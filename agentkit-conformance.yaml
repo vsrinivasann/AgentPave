@@ -1,0 +1,31 @@
+# AgentKit Conformance Declaration Template
+# Copy this file to the root of your implementation repository.
+# Fill in all fields before claiming conformance.
+
+agentkit_spec_version: "1.1.1"
+implementation_name: ""               # e.g. "AgentKit-LangGraph"
+implementation_version: ""            # SemVer e.g. "0.1.0"
+conformance_level: ""                 # "MVP" or "Full"
+
+dimensions_implemented:
+  # MVP dimensions — implement in this order
+  identity:       { version: "1.1", stability: "Beta", criteria_passed: false }
+  lifecycle:      { version: "1.1", stability: "Beta", criteria_passed: false }
+  communication:  { version: "1.1", stability: "Beta", criteria_passed: false }
+  memory:         { version: "1.1", stability: "Beta", criteria_passed: false }
+  observability:  { version: "1.1", stability: "Beta", criteria_passed: false }
+  reliability:    { version: "1.1", stability: "Beta", criteria_passed: false }
+
+  # Post-MVP dimensions — add when implemented
+  # security:       { version: "1.1", stability: "Alpha", criteria_passed: false }
+  # economics:      { version: "1.1", stability: "Alpha", criteria_passed: false }
+  # testability:    { version: "1.1", stability: "Alpha", criteria_passed: false }
+  # developer_experience: { version: "1.1", stability: "Alpha", criteria_passed: false }
+  # extensibility:  { version: "1.1", stability: "Alpha", criteria_passed: false }
+  # governance:     { version: "1.1", stability: "Alpha", criteria_passed: false }
+  # portability:    { version: "1.1", stability: "Alpha", criteria_passed: false }
+
+invariants_verified: false
+conformance_test_results: "conformance-results.json"
+interoperability_verified: false
+last_verified: ""                     # ISO 8601 date e.g. "2026-06-09"
