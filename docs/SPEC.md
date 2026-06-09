@@ -721,6 +721,30 @@ class AgentKitError(Exception):
 | `AgentKit.DeterministicTaskLLMRouteError` | `AGENTKIT_DETERMINISTIC_TASK_LLM_ROUTE` | No | A Deterministic Task is routed to the LLM |
 | `AgentKit.BudgetExceededError` | `AGENTKIT_BUDGET_EXCEEDED` | No | Token budget is exhausted |
 
+### 7.7 Security Errors (D7 — Release 2)
+
+| Error Type | Error Code | Recoverable | When Raised |
+|---|---|---|---|
+| `AgentKit.PolicyDeniedError` | `AGENTKIT_POLICY_DENIED` | No | PDP returns DENY for a tool call |
+| `AgentKit.PrivilegeEscalationError` | `AGENTKIT_PRIVILEGE_ESCALATION` | No | Agent attempts action exceeding invoking user's privilege |
+| `AgentKit.PromptInjectionDetectedError` | `AGENTKIT_PROMPT_INJECTION` | No | HIGH/CRITICAL injection pattern detected in tool output or user input |
+| `AgentKit.AuditTrailError` | `AGENTKIT_AUDIT_TRAIL_ERROR` | No — block the action | Audit trail write fails |
+| `AgentKit.PolicyLoadError` | `AGENTKIT_POLICY_LOAD_ERROR` | No — fix the policy | Policy document is invalid or cannot be loaded |
+
+### 7.8 Extensibility Errors (D11 — Release 2)
+
+| Error Type | Error Code | Recoverable | When Raised |
+|---|---|---|---|
+| `AgentKit.ExtensionLoadError` | `AGENTKIT_EXTENSION_LOAD_ERROR` | No — fix manifest or entry point | Extension manifest invalid, entry point not found, or wrong interface |
+| `AgentKit.ExtensionCompatibilityError` | `AGENTKIT_EXTENSION_COMPATIBILITY` | No — update extension or core | Extension core version requirement not satisfied |
+| `AgentKit.ExtensionConflictError` | `AGENTKIT_EXTENSION_CONFLICT` | No — unload existing first | Two extensions attempt to register at the same extension point |
+
+### 7.9 Governance Errors (D12 — Release 3)
+
+| Error Type | Error Code | Recoverable | When Raised |
+|---|---|---|---|
+| `AgentKit.GovernanceError` | `AGENTKIT_GOVERNANCE_ERROR` | No — fix governance issue | UNACCEPTABLE risk agent attempts operation, or HIGH_RISK agent deploys without approval |
+
 ---
 
 ## 8. Non-Functional Requirements
@@ -1096,6 +1120,7 @@ Breaking changes to this spec:
 | 1.0.0 | June 2026 | Initial spec — MVP scope, 6 dimensions, master spec structure |
 | 1.1.0 | June 2026 | Added: Standard Error Taxonomy (Section 7), Non-Functional Requirements (Section 8), Spec Invariants (Section 9), stability levels per dimension, formal dependency declarations, Definition of Done per dimension, AgentResult type definition, conformance results schema, interoperability test definition, machine-readable schema reference, rollback guidance for autonomous agents, spec linting rules |
 | 1.1.1 | June 2026 | Fixed: Added missing error types to taxonomy: ToolNotFoundError, ToolTimeoutError, CircuitBreakerOpenError, HumanInputTimeoutError (D3), MemoryBudgetError (D4) — discovered via cross-dimension automated validation |
+| 1.1.2 | June 2026 | Added: Post-MVP error taxonomy sections 7.7–7.9: Security errors (D7), Extensibility errors (D11), Governance errors (D12). Added post-MVP dimension specs D7–D13 to Document Index |
 
 ---
 
