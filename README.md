@@ -1,10 +1,10 @@
-# AgentKit
+# AgentPave
 
 > The SpringBoot for AI Agents — a simple, standardised, and extensible framework for building agents that run on any runtime, any cloud, any model.
 
 ---
 
-## What is AgentKit?
+## What is AgentPave?
 
 AgentKit is a **concept-first, runtime-agnostic framework** that gives developers a simple, standardised, and extensible way to create, run, and manage AI agents.
 
@@ -13,7 +13,7 @@ You define your agent once. AgentKit runs it on **LangGraph** or **MAF** — you
 ```
 [ Your Agent Definition ]
          ↓
-    [ AgentKit ]
+    [ AgentPave ]
      ↓         ↓
 LangGraph     MAF        ← you choose the runtime
      ↓         ↓
@@ -24,7 +24,7 @@ Any Cloud  Any Cloud     ← cloud agnostic
 
 ---
 
-## Why AgentKit?
+## Why AgentPave?
 
 Every agent framework today makes you choose a runtime and live with its opinions. LangGraph is powerful but complex. MAF is enterprise-grade but Azure-first. CrewAI is fast but hits walls in production.
 
