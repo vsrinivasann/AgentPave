@@ -1,10 +1,10 @@
-# AgentKit Dimension 11 — Extensibility
+# AgentPave Dimension 11 — Extensibility
 
 **Spec version:** 1.1  
 **Stability:** Alpha  
 **Depends on:** D1–D6 (MVP dimensions)  
 **Required by:** Nothing in Release 2  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 **Target Release:** Release 2  
 
 ---
@@ -35,9 +35,9 @@
 
 ### 1.1 Purpose
 
-A framework that cannot be extended is a framework with a ceiling. SpringBoot succeeded because its extension model (starters, auto-configuration, beans) allowed the community to build on top of it without forking it. AgentKit needs the same.
+A framework that cannot be extended is a framework with a ceiling. SpringBoot succeeded because its extension model (starters, auto-configuration, beans) allowed the community to build on top of it without forking it. AgentPave needs the same.
 
-D11 defines the extension model that governs how capabilities are added to AgentKit Core without modifying it. The core design principle — **core never depends on extensions; extensions always depend on core** — is enforced structurally, not by convention.
+D11 defines the extension model that governs how capabilities are added to AgentPave Core without modifying it. The core design principle — **core never depends on extensions; extensions always depend on core** — is enforced structurally, not by convention.
 
 ### 1.2 Production Consequence of Getting This Wrong
 
@@ -59,7 +59,7 @@ Extensibility that is not governed becomes a source of instability. Extensions t
 
 ### 2.2 Out of Scope
 
-- Building specific extensions (AgentKit-Observe, AgentKit-Eval etc.) — those are separate projects
+- Building specific extensions (AgentPave-Observe, AgentPave-Eval etc.) — those are separate projects
 - Extension hosting or package publishing — that is registry infrastructure
 - Extension sandboxing/security isolation — that is D7 concern
 
@@ -80,11 +80,11 @@ Extensibility that is not governed becomes a source of instability. Extensions t
 
 | Term | Definition |
 |---|---|
-| **Extension Point** | A named, versioned hook in AgentKit Core where an extension may attach behaviour. Eight are declared. No others exist until formally added to the spec. |
-| **Extension** | An optional, versioned module that adds capabilities to AgentKit Core via a single declared extension point. |
+| **Extension Point** | A named, versioned hook in AgentPave Core where an extension may attach behaviour. Eight are declared. No others exist until formally added to the spec. |
+| **Extension** | An optional, versioned module that adds capabilities to AgentPave Core via a single declared extension point. |
 | **Extension Manifest** | A YAML/JSON file declaring: extension identity, version, minimum core version, attachment point, and configuration schema. |
-| **Extension Registry** | The discovery mechanism for published AgentKit extensions. Not a hosting service — a searchable index. |
-| **Dependency Conflict** | A state where two extensions require incompatible versions of AgentKit Core or of a shared dependency. |
+| **Extension Registry** | The discovery mechanism for published AgentPave extensions. Not a hosting service — a searchable index. |
+| **Dependency Conflict** | A state where two extensions require incompatible versions of AgentPave Core or of a shared dependency. |
 | **Extension Isolation** | The property that an extension cannot modify core behaviour — it can only add behaviour at its declared extension point. |
 
 ---
@@ -112,19 +112,19 @@ class ExtensionPointName(str, Enum):
 
 class ExtensionManifest(BaseModel):
     """
-    The manifest file for an AgentKit extension.
-    Every extension must include this file as agentkit-extension.yaml.
+    The manifest file for an AgentPave extension.
+    Every extension must include this file as agentpave-extension.yaml.
     """
-    extension_id: str = Field(..., description="Unique identifier. e.g., 'agentkit-observe'.")
+    extension_id: str = Field(..., description="Unique identifier. e.g., 'agentpave-observe'.")
     extension_name: str = Field(..., description="Human-readable name.")
-    version: str = Field(..., description="SemVer. Independent of AgentKit Core version.")
-    agentkit_core_min_version: str = Field(
+    version: str = Field(..., description="SemVer. Independent of AgentPave Core version.")
+    agentpave_core_min_version: str = Field(
         ...,
-        description="Minimum AgentKit Core SemVer this extension requires."
+        description="Minimum AgentPave Core SemVer this extension requires."
     )
-    agentkit_core_max_version: Optional[str] = Field(
+    agentpave_core_max_version: Optional[str] = Field(
         None,
-        description="Maximum AgentKit Core SemVer (exclusive). None = no upper bound."
+        description="Maximum AgentPave Core SemVer (exclusive). None = no upper bound."
     )
     attachment_point: ExtensionPointName = Field(
         ...,
@@ -134,7 +134,7 @@ class ExtensionManifest(BaseModel):
         ...,
         description=(
             "Python import path to the class implementing the extension point interface. "
-            "Example: 'agentkit_observe.backend.LangSmithBackend'"
+            "Example: 'agentpave_observe.backend.LangSmithBackend'"
         )
     )
     description: str = Field(..., min_length=10)
@@ -190,18 +190,18 @@ class CompatibilityCheckResult(BaseModel):
 
 ## 6. Canonical Example
 
-### 6.1 Extension Manifest (agentkit-extension.yaml)
+### 6.1 Extension Manifest (agentpave-extension.yaml)
 
 ```yaml
-extension_id: agentkit-observe-langsmith
-extension_name: AgentKit LangSmith Observability Backend
+extension_id: agentpave-observe-langsmith
+extension_name: AgentPave LangSmith Observability Backend
 version: 1.0.0
-agentkit_core_min_version: "1.1.0"
-agentkit_core_max_version: null
+agentpave_core_min_version: "1.1.0"
+agentpave_core_max_version: null
 attachment_point: observability.backend
-entry_point: agentkit_observe_langsmith.backend.LangSmithBackend
-description: Routes AgentKit observability events to LangSmith for tracing and evaluation.
-author: AgentKit Contributors
+entry_point: agentpave_observe_langsmith.backend.LangSmithBackend
+description: Routes AgentPave observability events to LangSmith for tracing and evaluation.
+author: AgentPave Contributors
 license: Apache-2.0
 config_schema:
   type: object
@@ -223,7 +223,7 @@ dependencies:
 # Load and register an extension
 loader = ExtensionLoader()
 registration = loader.load(
-    manifest_path="agentkit-extension.yaml",
+    manifest_path="agentpave-extension.yaml",
     config={"api_key": "secret_ref://vault/langsmith/api_key", "project_name": "my-agents"}
 )
 
@@ -245,7 +245,7 @@ from abc import ABC, abstractmethod
 
 class ExtensionLoader(ABC):
     """
-    Loads, validates, and registers AgentKit extensions.
+    Loads, validates, and registers AgentPave extensions.
     """
 
     @abstractmethod
@@ -258,8 +258,8 @@ class ExtensionLoader(ABC):
         Load an extension from its manifest file.
 
         Steps:
-        1. Parse and validate agentkit-extension.yaml against ExtensionManifest schema.
-        2. Check compatibility with current AgentKit Core version.
+        1. Parse and validate agentpave-extension.yaml against ExtensionManifest schema.
+        2. Check compatibility with current AgentPave Core version.
         3. Validate config against manifest.config_schema (if defined).
         4. Import entry_point class.
         5. Verify class implements the interface for attachment_point.
@@ -268,9 +268,9 @@ class ExtensionLoader(ABC):
         8. Return ExtensionRegistration.
 
         Raises:
-            AgentKit.ExtensionLoadError: any step fails.
-            AgentKit.ExtensionCompatibilityError: version incompatible.
-            AgentKit.ExtensionConflictError: another extension already registered at this point.
+            AgentPave.ExtensionLoadError: any step fails.
+            AgentPave.ExtensionCompatibilityError: version incompatible.
+            AgentPave.ExtensionConflictError: another extension already registered at this point.
         """
         ...
 
@@ -307,15 +307,15 @@ class ExtensionLoader(ABC):
 
 **THE SYSTEM SHALL** check core version compatibility before loading any extension.
 
-**WHEN** core version is outside `[agentkit_core_min_version, agentkit_core_max_version)` **THE SYSTEM SHALL** raise `AgentKit.ExtensionCompatibilityError`.
+**WHEN** core version is outside `[agentpave_core_min_version, agentpave_core_max_version)` **THE SYSTEM SHALL** raise `AgentPave.ExtensionCompatibilityError`.
 
 **THE SYSTEM SHALL** verify the extension's entry point class implements the correct interface for its declared `attachment_point`.
 
-**WHEN** an extension attempts to attach at an undeclared extension point **THE SYSTEM SHALL** raise `AgentKit.ExtensionLoadError`.
+**WHEN** an extension attempts to attach at an undeclared extension point **THE SYSTEM SHALL** raise `AgentPave.ExtensionLoadError`.
 
 ### 8.2 Extension Isolation
 
-**THE SYSTEM SHALL** enforce that AgentKit Core never imports extension modules.
+**THE SYSTEM SHALL** enforce that AgentPave Core never imports extension modules.
 
 **THE SYSTEM SHALL** enforce this via a CI linting rule: any import of a known extension package in core code fails the build.
 
@@ -325,7 +325,7 @@ class ExtensionLoader(ABC):
 
 **THE SYSTEM SHALL** allow only one extension registered per extension point at a time.
 
-**WHEN** a second extension attempts to register at an already-occupied extension point **THE SYSTEM SHALL** raise `AgentKit.ExtensionConflictError`.
+**WHEN** a second extension attempts to register at an already-occupied extension point **THE SYSTEM SHALL** raise `AgentPave.ExtensionConflictError`.
 
 ---
 
@@ -354,11 +354,11 @@ class ExtensionLoader(ABC):
 
 | Scenario | Error Type | Recoverable | Required context |
 |---|---|---|---|
-| Manifest schema invalid | `AgentKit.ExtensionLoadError` | No — fix manifest | `extension_id, validation_errors` |
-| Core version incompatible | `AgentKit.ExtensionCompatibilityError` | No — update extension or core | `extension_id, core_version, required_min` |
-| Extension point already occupied | `AgentKit.ExtensionConflictError` | No — unload existing first | `extension_id, attachment_point, current_extension` |
-| Entry point class not found | `AgentKit.ExtensionLoadError` | No — fix entry_point path | `extension_id, entry_point` |
-| Entry point wrong interface | `AgentKit.ExtensionLoadError` | No — fix implementation | `extension_id, expected_interface` |
+| Manifest schema invalid | `AgentPave.ExtensionLoadError` | No — fix manifest | `extension_id, validation_errors` |
+| Core version incompatible | `AgentPave.ExtensionCompatibilityError` | No — update extension or core | `extension_id, core_version, required_min` |
+| Extension point already occupied | `AgentPave.ExtensionConflictError` | No — unload existing first | `extension_id, attachment_point, current_extension` |
+| Entry point class not found | `AgentPave.ExtensionLoadError` | No — fix entry_point path | `extension_id, entry_point` |
+| Entry point wrong interface | `AgentPave.ExtensionLoadError` | No — fix implementation | `extension_id, expected_interface` |
 
 ---
 
@@ -380,15 +380,15 @@ Error raised: None
 
 Criteria ID:  D11-002
 Stability:    Alpha
-Given:        Extension manifest declaring agentkit_core_min_version="2.0.0"
-              Current AgentKit Core version is "1.1.1"
+Given:        Extension manifest declaring agentpave_core_min_version="2.0.0"
+              Current AgentPave Core version is "1.1.1"
 When:         ExtensionLoader.load() is called
-Then:         AgentKit.ExtensionCompatibilityError raised
+Then:         AgentPave.ExtensionCompatibilityError raised
               Extension is NOT loaded
 Pass:         ExtensionCompatibilityError raised,
               context contains version information
 Fail:         Extension loaded despite version incompatibility
-Error raised: AgentKit.ExtensionCompatibilityError
+Error raised: AgentPave.ExtensionCompatibilityError
 
 ---
 
@@ -396,12 +396,12 @@ Criteria ID:  D11-003
 Stability:    Alpha
 Given:        Extension A already registered at observability.backend
 When:         Extension B attempts to register at observability.backend
-Then:         AgentKit.ExtensionConflictError raised
+Then:         AgentPave.ExtensionConflictError raised
               Extension A remains active
 Pass:         ExtensionConflictError raised,
               Extension A still registered (not replaced)
 Fail:         Extension B replaces Extension A silently
-Error raised: AgentKit.ExtensionConflictError
+Error raised: AgentPave.ExtensionConflictError
 
 ---
 
@@ -410,10 +410,10 @@ Stability:    Alpha
 Given:        Extension manifest with attachment_point="custom.nonexistent"
               (not in ExtensionPointName enum)
 When:         ExtensionLoader.load() is called
-Then:         AgentKit.ExtensionLoadError raised
+Then:         AgentPave.ExtensionLoadError raised
 Pass:         ExtensionLoadError raised mentioning invalid attachment point
 Fail:         Extension loaded at undeclared point
-Error raised: AgentKit.ExtensionLoadError
+Error raised: AgentPave.ExtensionLoadError
 ```
 
 ---
@@ -465,8 +465,8 @@ Two observability backends both trying to receive every event creates ordering a
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph and AgentKit-MAF
-- Extension manifest discovery: scan for `agentkit-extension.yaml` in installed packages
+### 15.1 AgentPave-LangGraph and AgentPave-MAF
+- Extension manifest discovery: scan for `agentpave-extension.yaml` in installed packages
 - Entry point loading: Python `importlib.import_module()` + `getattr()`
 - Interface verification: `isinstance(instance, expected_abstract_class)`
 - SemVer comparison: `packaging.version.Version` (pip: `packaging`)
@@ -491,4 +491,4 @@ Two observability backends both trying to receive every event creates ordering a
 
 ---
 
-*AgentKit Dimension 11 — Extensibility — v1.1*
+*AgentPave Dimension 11 — Extensibility — v1.1*

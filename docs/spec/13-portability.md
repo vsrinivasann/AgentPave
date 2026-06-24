@@ -1,10 +1,10 @@
-# AgentKit Dimension 13 — Portability
+# AgentPave Dimension 13 — Portability
 
 **Spec version:** 1.1  
 **Stability:** Alpha  
 **Depends on:** D1–D12 (all dimensions)  
 **Required by:** Nothing — this is the final dimension  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 **Target Release:** Release 3  
 
 ---
@@ -35,7 +35,7 @@
 
 ### 1.1 Purpose
 
-Portability is the promise that started AgentKit: write your agent definition once, run it anywhere. D13 formalises this promise into verifiable contracts and an interoperability test suite.
+Portability is the promise that started AgentPave: write your agent definition once, run it anywhere. D13 formalises this promise into verifiable contracts and an interoperability test suite.
 
 D13 delivers four capabilities:
 1. **Runtime portability** — same AgentDefinition runs on LangGraph and MAF without modification
@@ -47,7 +47,7 @@ Portability is not a feature — it is the validation that every other dimension
 
 ### 1.2 Production Consequence of Getting This Wrong
 
-A spec that leaks runtime-specific concepts creates lock-in. Developers who adopt AgentKit expecting portability will find they have traded one form of vendor lock-in for another — a trust-destroying outcome. The interoperability test suite is the mechanism that proves portability is real, not claimed.
+A spec that leaks runtime-specific concepts creates lock-in. Developers who adopt AgentPave expecting portability will find they have traded one form of vendor lock-in for another — a trust-destroying outcome. The interoperability test suite is the mechanism that proves portability is real, not claimed.
 
 ---
 
@@ -59,8 +59,8 @@ A spec that leaks runtime-specific concepts creates lock-in. Developers who adop
 - Language portability contract: spec requirements that must hold in any language implementation
 - Cloud portability requirements: no cloud-specific types, APIs, or dependencies in core
 - Protocol portability: MCP and A2A as the only inter-system communication protocols
-- Runtime adapter specification: what a new runtime must implement to be AgentKit-conformant
-- Portability validation tooling: `agentkit portability-check` command
+- Runtime adapter specification: what a new runtime must implement to be AgentPave-conformant
+- Portability validation tooling: `agentpave portability-check` command
 
 ### 2.2 Out of Scope
 
@@ -76,9 +76,9 @@ A spec that leaks runtime-specific concepts creates lock-in. Developers who adop
 |---|---|
 | **Interoperability is tested, not assumed** | Claiming portability without a test suite is marketing. The interoperability test suite is the proof. |
 | **Python is the reference language, not the only language** | The spec uses Python for data model examples because it is the first reference implementation. Nothing in the spec prevents Java, Go, or TypeScript implementations. |
-| **MCP and A2A are the only protocol dependencies** | Any other protocol creates a portability barrier. No proprietary protocols are permitted in AgentKit Core. |
+| **MCP and A2A are the only protocol dependencies** | Any other protocol creates a portability barrier. No proprietary protocols are permitted in AgentPave Core. |
 | **Cloud providers are pluggable backends only** | AWS, Azure, GCP may back storage, vector DBs, or observability — but they are never imported in core code. Core must run on a developer's laptop with no cloud account. |
-| **Runtime adapter interface is fully specified** | A new runtime (LangGraph v2, a future framework) must only implement the RuntimeAdapter interface to be AgentKit-conformant. No other integration work required. |
+| **Runtime adapter interface is fully specified** | A new runtime (LangGraph v2, a future framework) must only implement the RuntimeAdapter interface to be AgentPave-conformant. No other integration work required. |
 
 ---
 
@@ -86,10 +86,10 @@ A spec that leaks runtime-specific concepts creates lock-in. Developers who adop
 
 | Term | Definition |
 |---|---|
-| **Portability** | The property of an agent definition that allows it to run on any conformant AgentKit runtime without modification. |
-| **Interoperability** | The property of two conformant AgentKit runtimes producing equivalent observable behaviour for the same agent definition. |
-| **Runtime Adapter** | The implementation-specific bridge between AgentKit Core abstractions and a concrete runtime (LangGraph, MAF). |
-| **Language Implementation** | An implementation of the AgentKit spec in a programming language other than Python. Must implement all core interfaces and pass the conformance test suite. |
+| **Portability** | The property of an agent definition that allows it to run on any conformant AgentPave runtime without modification. |
+| **Interoperability** | The property of two conformant AgentPave runtimes producing equivalent observable behaviour for the same agent definition. |
+| **Runtime Adapter** | The implementation-specific bridge between AgentPave Core abstractions and a concrete runtime (LangGraph, MAF). |
+| **Language Implementation** | An implementation of the AgentPave spec in a programming language other than Python. Must implement all core interfaces and pass the conformance test suite. |
 | **Portability Violation** | A spec or implementation detail that prevents an agent definition from running on more than one runtime without modification. |
 | **Equivalent Behaviour** | Two executions are behaviourally equivalent if: Agent IDs are structurally identical, lifecycle transitions produce identical state sequences, tool call results produce structurally identical AgentResults, and error types are identical for identical failure scenarios. |
 | **Cloud-Agnostic** | The property of core code that contains no imports, dependencies, or types from any cloud provider SDK (AWS boto3, Azure SDK, GCP SDK). |
@@ -125,7 +125,7 @@ class PortabilityViolation(BaseModel):
 
 
 class PortabilityCheckResult(BaseModel):
-    """Result of running agentkit portability-check."""
+    """Result of running agentpave portability-check."""
     portable: bool = Field(..., description="True only if zero critical violations.")
     violations: list[PortabilityViolation] = Field(default_factory=list)
     runtimes_tested: list[str] = Field(default_factory=list)
@@ -187,16 +187,16 @@ class InteroperabilityTestResult(BaseModel):
 ```python
 class RuntimeAdapterSpec(BaseModel):
     """
-    Specification that a runtime adapter must implement to be AgentKit-conformant.
+    Specification that a runtime adapter must implement to be AgentPave-conformant.
     A new runtime (e.g., a hypothetical future framework) implements this to join the ecosystem.
     """
     runtime_id: str = Field(..., description="Unique identifier. e.g., 'langgraph', 'maf'.")
     runtime_version: str = Field(..., description="SemVer of the runtime this adapter targets.")
-    agentkit_spec_version: str = Field(..., description="AgentKit Spec version this adapter targets.")
+    agentpave_spec_version: str = Field(..., description="AgentPave Spec version this adapter targets.")
     required_interfaces: list[str] = Field(
         ...,
         description=(
-            "List of AgentKit abstract interfaces this adapter must implement. "
+            "List of AgentPave abstract interfaces this adapter must implement. "
             "All 6 MVP dimension interfaces are required for conformance."
         )
     )
@@ -228,8 +228,8 @@ canonical_test = InteroperabilityTestCase(
     agent_definition={
         "name": "interop-test-agent",
         "version": "1.0.0",
-        "owner": "test@agentkit.io",
-        "purpose": "Canonical interoperability test agent for AgentKit spec validation",
+        "owner": "test@agentpave.io",
+        "purpose": "Canonical interoperability test agent for AgentPave spec validation",
         "domain": "testing",
         "llm_interface_version": "1.0.0",
         "reliability_contract": {
@@ -239,7 +239,7 @@ canonical_test = InteroperabilityTestCase(
         },
         "token_budget": {"per_task": 500, "per_day": 10000}
     },
-    task_input="Search for AgentKit documentation",
+    task_input="Search for AgentPave documentation",
     expected_lifecycle_sequence=["DECLARED", "REGISTERED", "RUNNING", "RETIRED"],
     expected_tool_calls=["web_search"],
     expected_result_status="success"
@@ -249,11 +249,11 @@ canonical_test = InteroperabilityTestCase(
 ### 6.2 Portability Check Output
 
 ```
-$ agentkit portability-check
+$ agentpave portability-check
 
-AgentKit Portability Check v1.1.1
+AgentPave Portability Check v1.1.1
 ====================================
-Checking: AgentKit-LangGraph v0.1.0
+Checking: AgentPave-LangGraph v0.1.0
 
 ✓ No runtime-specific imports in core
 ✓ No cloud provider imports in core
@@ -283,8 +283,8 @@ from abc import ABC, abstractmethod
 
 class PortabilityChecker(ABC):
     """
-    Validates that an AgentKit implementation is portable.
-    Used by agentkit portability-check CLI command.
+    Validates that an AgentPave implementation is portable.
+    Used by agentpave portability-check CLI command.
     """
 
     @abstractmethod
@@ -301,7 +301,7 @@ class PortabilityChecker(ABC):
     @abstractmethod
     def check_schema_consistency(self) -> list[PortabilityViolation]:
         """
-        Verify data models are consistent with agentkit-schema.json.
+        Verify data models are consistent with agentpave-schema.json.
         Returns list of divergences.
         """
         ...
@@ -322,7 +322,7 @@ class PortabilityChecker(ABC):
     def full_check(self, implementation_path: str) -> PortabilityCheckResult:
         """
         Run all portability checks and return combined result.
-        Called by agentkit portability-check command.
+        Called by agentpave portability-check command.
         """
         ...
 ```
@@ -332,11 +332,11 @@ class PortabilityChecker(ABC):
 ```python
 class RuntimeAdapter(ABC):
     """
-    The interface a new runtime must implement to be AgentKit-conformant.
-    Provides the bridge between AgentKit Core abstractions and the runtime.
+    The interface a new runtime must implement to be AgentPave-conformant.
+    Provides the bridge between AgentPave Core abstractions and the runtime.
 
     Any runtime that implements all required methods and passes the
-    conformance test suite may claim 'AgentKit Conformant Runtime'.
+    conformance test suite may claim 'AgentPave Conformant Runtime'.
     """
 
     @abstractmethod
@@ -390,7 +390,7 @@ class RuntimeAdapter(ABC):
 
 **THE SYSTEM SHALL** produce structurally identical AgentResult objects for the same tool call on any conformant runtime.
 
-**THE SYSTEM SHALL** raise the same AgentKit error types for the same failure conditions on any conformant runtime.
+**THE SYSTEM SHALL** raise the same AgentPave error types for the same failure conditions on any conformant runtime.
 
 ### 8.2 Language Portability
 
@@ -402,7 +402,7 @@ class RuntimeAdapter(ABC):
 
 ### 8.3 Cloud Portability
 
-**THE SYSTEM SHALL** ensure no cloud provider SDK is imported in AgentKit Core.
+**THE SYSTEM SHALL** ensure no cloud provider SDK is imported in AgentPave Core.
 
 **THE SYSTEM SHALL** verify this with an automated linting rule that scans core for imports of `boto3`, `azure-*`, `google-cloud-*`, and similar cloud SDK packages.
 
@@ -440,7 +440,7 @@ class RuntimeAdapter(ABC):
 
 ## 10. Error Handling
 
-Portability violations are reported as `PortabilityViolation` objects — not exceptions. The `agentkit portability-check` command exits with non-zero code when critical violations are found.
+Portability violations are reported as `PortabilityViolation` objects — not exceptions. The `agentpave portability-check` command exits with non-zero code when critical violations are found.
 
 | Violation Type | Severity | Fix |
 |---|---|---|
@@ -458,7 +458,7 @@ Portability violations are reported as `PortabilityViolation` objects — not ex
 Criteria ID:  D13-001
 Stability:    Alpha
 Given:        The canonical interoperability test case (Section 6.1)
-When:         Run on AgentKit-LangGraph AND AgentKit-MAF with mock tools
+When:         Run on AgentPave-LangGraph AND AgentPave-MAF with mock tools
 Then:         Both runtimes produce:
               - Identical lifecycle state sequence: [DECLARED, REGISTERED, RUNNING, RETIRED]
               - Identical tool call sequence: [web_search]
@@ -472,8 +472,8 @@ Error raised: None
 
 Criteria ID:  D13-002
 Stability:    Alpha
-Given:        AgentKit-LangGraph core source code
-When:         agentkit portability-check runs import scan
+Given:        AgentPave-LangGraph core source code
+When:         agentpave portability-check runs import scan
 Then:         Zero cloud provider SDK imports found in core modules
               Zero runtime-specific (LangGraph) imports in core interfaces
 Pass:         portability_check.violations is empty for import checks
@@ -485,20 +485,20 @@ Error raised: None (SystemExit non-zero if violations found)
 Criteria ID:  D13-003
 Stability:    Alpha
 Given:        The same AgentDefinition (canonical example from Section 6.1)
-When:         AgentKit.InvalidAgentDefinitionError is triggered on BOTH runtimes
+When:         AgentPave.InvalidAgentDefinitionError is triggered on BOTH runtimes
               (by submitting an invalid version string)
-Then:         Both runtimes raise AgentKit.InvalidAgentDefinitionError
+Then:         Both runtimes raise AgentPave.InvalidAgentDefinitionError
               Both error contexts contain validation_errors list
               Both exit with the same error_code: AGENTKIT_INVALID_AGENT_DEFINITION
 Pass:         Same error type and error_code on both runtimes
 Fail:         Different error types or codes on different runtimes
-Error raised: AgentKit.InvalidAgentDefinitionError (on both runtimes)
+Error raised: AgentPave.InvalidAgentDefinitionError (on both runtimes)
 
 ---
 
 Criteria ID:  D13-004
 Stability:    Alpha
-Given:        The AgentKit spec MUST requirements (from all 13 dimensions)
+Given:        The AgentPave spec MUST requirements (from all 13 dimensions)
 When:         Each MUST requirement is inspected for Python-specific syntax
 Then:         Zero MUST requirements contain Python-specific constructs
               (Python-specific constructs include: list comprehensions in requirements,
@@ -518,12 +518,12 @@ Error raised: None (spec audit finding, not runtime error)
 - [ ] `PortabilityChecker` abstract + concrete implemented
 - [ ] `RuntimeAdapter` abstract interface implemented
 - [ ] Canonical interoperability test suite (minimum 4 test cases) implemented
-- [ ] `agentkit portability-check` CLI command implemented
+- [ ] `agentpave portability-check` CLI command implemented
 - [ ] CI linting rule: no cloud SDK imports in core
 - [ ] CI linting rule: no runtime-specific imports in core
 - [ ] Interoperability suite runs on every release (CI integration)
 - [ ] All 4 acceptance criteria pass: D13-001 through D13-004
-- [ ] Both AgentKit-LangGraph and AgentKit-MAF pass full interoperability suite
+- [ ] Both AgentPave-LangGraph and AgentPave-MAF pass full interoperability suite
 
 ---
 
@@ -535,7 +535,7 @@ Task D13-T1: Implement data models (PortabilityViolation, PortabilityCheckResult
 Task D13-T2: Implement PortabilityChecker abstract + concrete
 Task D13-T3: Implement RuntimeAdapter abstract interface
 Task D13-T4: Build canonical interoperability test suite (4+ test cases)
-Task D13-T5: Implement agentkit portability-check CLI command
+Task D13-T5: Implement agentpave portability-check CLI command
 Task D13-T6: Add CI linting rules (cloud SDK imports, runtime-specific imports)
 Task D13-T7: Run interoperability suite against both runtimes
 Task D13-T8: Run all 4 acceptance criteria
@@ -553,7 +553,7 @@ Claiming portability without a test suite is a hope, not a guarantee. The intero
 An AgentDefinition field that uses a LangGraph-specific type (e.g., `StateGraph`) is a portability violation. Agent definitions must be pure Python dicts or JSON — no runtime types.
 
 **Anti-Pattern 3 — Cloud SDK imports in core**
-An AgentKit core module that imports `boto3` for S3 checkpoint storage means AgentKit requires AWS. This violates the cloud-agnostic principle and excludes developers on Azure or GCP.
+An AgentPave core module that imports `boto3` for S3 checkpoint storage means AgentPave requires AWS. This violates the cloud-agnostic principle and excludes developers on Azure or GCP.
 
 **Anti-Pattern 4 — Proprietary protocols**
 Using a proprietary RPC protocol instead of MCP or A2A for tool communication creates a wall that prevents tool reuse across frameworks. MCP is already the universal standard — use it.
@@ -573,10 +573,10 @@ A spec requirement that says "must be a Python `@dataclass`" cannot be implement
 ### 15.2 Language Implementation Guide
 Future implementations in Java, Go, or TypeScript must:
 1. Implement all abstract interfaces defined in D1–D6
-2. Use agentkit-schema.json for data model validation
+2. Use agentpave-schema.json for data model validation
 3. Pass the full conformance test suite
 4. Pass the interoperability test suite against at least one existing runtime
-5. Publish an `agentkit-conformance.yaml` declaring conformance level
+5. Publish an `agentpave-conformance.yaml` declaring conformance level
 
 ### 15.3 Known Portability Constraints
 | Constraint | LangGraph | MAF | Spec Impact |
@@ -594,7 +594,7 @@ All constraints are implementation details — observable behaviour is identical
 | # | Question | Blocks Stable? |
 |---|---|---|
 | OQ-1 | Should the interoperability test suite be published as a standalone package? | Yes — enables community runtime implementations |
-| OQ-2 | Should AgentKit publish a Java reference implementation? | No — community effort |
+| OQ-2 | Should AgentPave publish a Java reference implementation? | No — community effort |
 | OQ-3 | Should checkpoint format be standardised for cross-runtime checkpoint portability? | Yes — major feature, requires spec update |
 
 ---
@@ -607,4 +607,4 @@ All constraints are implementation details — observable behaviour is identical
 
 ---
 
-*AgentKit Dimension 13 — Portability — v1.1*
+*AgentPave Dimension 13 — Portability — v1.1*

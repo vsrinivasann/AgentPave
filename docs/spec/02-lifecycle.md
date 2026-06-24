@@ -1,10 +1,10 @@
-# AgentKit Dimension 2 — Lifecycle
+# AgentPave Dimension 2 — Lifecycle
 
 **Spec version:** 1.1  
 **Stability:** Beta  
 **Depends on:** D1 (Identity)  
 **Required by:** D3, D4, D5, D6  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 
 ---
 
@@ -70,7 +70,7 @@ If Lifecycle is implemented incorrectly:
 
 - What the agent does while RUNNING — that is D3, D4, D5, D6
 - Checkpoint creation within RUNNING state — that is D6 (Reliability)
-- Human approval for state transitions — that is AgentKit-HITL extension
+- Human approval for state transitions — that is AgentPave-HITL extension
 - Token issuance per spawn — that is D1 (Identity) `IdentityService`
 - Agent retirement criteria and policy — that is D12 (Governance)
 
@@ -108,7 +108,7 @@ If Lifecycle is implemented incorrectly:
 
 ### 5.1 Lifecycle Transition Table
 
-This is the authoritative, exhaustive list of valid transitions. Any transition not in this table is INVALID and MUST raise `AgentKit.InvalidStateTransitionError`.
+This is the authoritative, exhaustive list of valid transitions. Any transition not in this table is INVALID and MUST raise `AgentPave.InvalidStateTransitionError`.
 
 ```python
 from typing import FrozenSet, Tuple
@@ -308,7 +308,7 @@ assert record.lifecycle_state == "RETIRED"
 try:
     lifecycle_manager.invoke(agent_id=record.agent_id, task_id=new_uuid4(), actor="user@example.com")
     assert False, "Should have raised RetiredAgentError"
-except AgentKit.RetiredAgentError:
+except AgentPave.RetiredAgentError:
     pass  # Expected
 ```
 
@@ -323,7 +323,7 @@ try:
         actor="user@example.com"
     )
     assert False, "Should have raised InvalidStateTransitionError"
-except AgentKit.InvalidStateTransitionError as e:
+except AgentPave.InvalidStateTransitionError as e:
     assert e.context["from_state"] == "DECLARED"
     assert e.context["to_state"] == "RUNNING"
 ```
@@ -345,7 +345,7 @@ LifecycleHookFn = Callable[[LifecycleHookContext], None]
 
 class LifecycleManager(ABC):
     """
-    Governs all lifecycle state transitions for AgentKit agents.
+    Governs all lifecycle state transitions for AgentPave agents.
 
     Contract rules:
     - All state transitions are atomic: the state is only committed if the
@@ -377,9 +377,9 @@ class LifecycleManager(ABC):
             AgentRecord with lifecycle_state == REGISTERED.
 
         Raises:
-            AgentKit.AgentNotFoundError: agent_id not in registry.
-            AgentKit.InvalidStateTransitionError: agent not in DECLARED state.
-            AgentKit.LifecycleHookError: on_register hook raised an exception.
+            AgentPave.AgentNotFoundError: agent_id not in registry.
+            AgentPave.InvalidStateTransitionError: agent not in DECLARED state.
+            AgentPave.LifecycleHookError: on_register hook raised an exception.
         """
         ...
 
@@ -405,9 +405,9 @@ class LifecycleManager(ABC):
             AgentRecord with lifecycle_state == RUNNING.
 
         Raises:
-            AgentKit.AgentNotFoundError: agent_id not in registry.
-            AgentKit.InvalidStateTransitionError: agent not in REGISTERED state.
-            AgentKit.LifecycleHookError: on_start hook raised an exception.
+            AgentPave.AgentNotFoundError: agent_id not in registry.
+            AgentPave.InvalidStateTransitionError: agent not in REGISTERED state.
+            AgentPave.LifecycleHookError: on_start hook raised an exception.
         """
         ...
 
@@ -433,9 +433,9 @@ class LifecycleManager(ABC):
             AgentRecord with lifecycle_state == PAUSED.
 
         Raises:
-            AgentKit.AgentNotFoundError: agent_id not in registry.
-            AgentKit.InvalidStateTransitionError: agent not in RUNNING state.
-            AgentKit.LifecycleHookError: on_pause hook raised an exception.
+            AgentPave.AgentNotFoundError: agent_id not in registry.
+            AgentPave.InvalidStateTransitionError: agent not in RUNNING state.
+            AgentPave.LifecycleHookError: on_pause hook raised an exception.
         """
         ...
 
@@ -464,9 +464,9 @@ class LifecycleManager(ABC):
             AgentRecord with lifecycle_state == RUNNING.
 
         Raises:
-            AgentKit.AgentNotFoundError: agent_id not in registry.
-            AgentKit.InvalidStateTransitionError: agent not in PAUSED state.
-            AgentKit.LifecycleHookError: on_resume or on_running hook raised.
+            AgentPave.AgentNotFoundError: agent_id not in registry.
+            AgentPave.InvalidStateTransitionError: agent not in PAUSED state.
+            AgentPave.LifecycleHookError: on_resume or on_running hook raised.
         """
         ...
 
@@ -493,10 +493,10 @@ class LifecycleManager(ABC):
             AgentRecord with lifecycle_state == RETIRED.
 
         Raises:
-            AgentKit.AgentNotFoundError: agent_id not in registry.
-            AgentKit.RetiredAgentError: agent is already RETIRED.
-            AgentKit.InvalidStateTransitionError: agent in DECLARED or REGISTERED state.
-            AgentKit.LifecycleHookError: on_retire hook raised an exception.
+            AgentPave.AgentNotFoundError: agent_id not in registry.
+            AgentPave.RetiredAgentError: agent is already RETIRED.
+            AgentPave.InvalidStateTransitionError: agent in DECLARED or REGISTERED state.
+            AgentPave.LifecycleHookError: on_retire hook raised an exception.
             ValueError: reason contains fewer than 3 words.
         """
         ...
@@ -512,7 +512,7 @@ class LifecycleManager(ABC):
                 Empty list if agent exists but has no transitions yet.
 
         Raises:
-            AgentKit.AgentNotFoundError: agent_id not in registry.
+            AgentPave.AgentNotFoundError: agent_id not in registry.
         """
         ...
 
@@ -543,7 +543,7 @@ class LifecycleManager(ABC):
 
 **THE SYSTEM SHALL** validate every state transition against the VALID_TRANSITIONS table before executing it.
 
-**WHEN** a transition is not in VALID_TRANSITIONS **THE SYSTEM SHALL** raise `AgentKit.InvalidStateTransitionError` with context `{"from_state": str, "to_state": str, "agent_id": str}` and abort the transition without modifying the agent's state.
+**WHEN** a transition is not in VALID_TRANSITIONS **THE SYSTEM SHALL** raise `AgentPave.InvalidStateTransitionError` with context `{"from_state": str, "to_state": str, "agent_id": str}` and abort the transition without modifying the agent's state.
 
 **THE SYSTEM SHALL** make state transitions atomic: either the full transition (hook invocation + state commit + audit log write) completes, or nothing changes.
 
@@ -551,7 +551,7 @@ class LifecycleManager(ABC):
 
 **THE SYSTEM SHALL** invoke lifecycle hooks synchronously before committing the new state.
 
-**WHEN** a lifecycle hook raises any exception **THE SYSTEM SHALL** abort the state transition, preserve the agent's current state, and raise `AgentKit.LifecycleHookError` with the original exception captured in `context["cause"]`.
+**WHEN** a lifecycle hook raises any exception **THE SYSTEM SHALL** abort the state transition, preserve the agent's current state, and raise `AgentPave.LifecycleHookError` with the original exception captured in `context["cause"]`.
 
 **THE SYSTEM SHALL** invoke hooks in registration order when multiple hooks are registered for the same event.
 
@@ -559,7 +559,7 @@ class LifecycleManager(ABC):
 
 ### 8.3 RETIRED Terminal State
 
-**WHEN** an agent enters RETIRED state **THE SYSTEM SHALL** prevent all further state transitions — any attempt raises `AgentKit.RetiredAgentError`.
+**WHEN** an agent enters RETIRED state **THE SYSTEM SHALL** prevent all further state transitions — any attempt raises `AgentPave.RetiredAgentError`.
 
 **WHEN** an agent is retired **THE SYSTEM SHALL** revoke all active Runtime Tokens for that agent via `IdentityService`.
 
@@ -622,10 +622,10 @@ class LifecycleManager(ABC):
 
 | Scenario | Error Type | Recoverable | Required context |
 |---|---|---|---|
-| Transition not in VALID_TRANSITIONS | `AgentKit.InvalidStateTransitionError` | No | `agent_id, from_state, to_state` |
-| Any operation on RETIRED agent | `AgentKit.RetiredAgentError` | No | `agent_id, retired_at` |
-| Lifecycle hook raises exception | `AgentKit.LifecycleHookError` | Yes (retry) | `agent_id, hook_name, cause: str` |
-| agent_id not found | `AgentKit.AgentNotFoundError` | No | `agent_id` |
+| Transition not in VALID_TRANSITIONS | `AgentPave.InvalidStateTransitionError` | No | `agent_id, from_state, to_state` |
+| Any operation on RETIRED agent | `AgentPave.RetiredAgentError` | No | `agent_id, retired_at` |
+| Lifecycle hook raises exception | `AgentPave.LifecycleHookError` | Yes (retry) | `agent_id, hook_name, cause: str` |
+| agent_id not found | `AgentPave.AgentNotFoundError` | No | `agent_id` |
 | retire() reason < 3 words | `ValueError` | No | — |
 | retire() with active tasks, no force=True | `ValueError` | No | — |
 
@@ -665,12 +665,12 @@ Criteria ID:  D2-003
 Stability:    Beta
 Given:        A declared agent (lifecycle_state == DECLARED)
 When:         lifecycle_manager.invoke(agent_id, task_id=<uuid>, actor="user@example.com")
-Then:         AgentKit.InvalidStateTransitionError is raised
+Then:         AgentPave.InvalidStateTransitionError is raised
               Agent remains in DECLARED state
 Pass:         Error raised, context["from_state"]=="DECLARED", context["to_state"]=="RUNNING",
               agent.lifecycle_state == "DECLARED" (unchanged)
 Fail:         Agent transitions to RUNNING, or different error raised
-Error raised: AgentKit.InvalidStateTransitionError
+Error raised: AgentPave.InvalidStateTransitionError
 
 ---
 
@@ -719,11 +719,11 @@ Criteria ID:  D2-007
 Stability:    Beta
 Given:        A retired agent (lifecycle_state == RETIRED)
 When:         lifecycle_manager.invoke(agent_id, task_id=<uuid>, actor="user@example.com")
-Then:         AgentKit.RetiredAgentError is raised
+Then:         AgentPave.RetiredAgentError is raised
               Agent remains in RETIRED state
 Pass:         RetiredAgentError raised, context["agent_id"] matches, lifecycle_state unchanged
 Fail:         Agent transitions out of RETIRED, or different error raised
-Error raised: AgentKit.RetiredAgentError
+Error raised: AgentPave.RetiredAgentError
 
 ---
 
@@ -731,14 +731,14 @@ Criteria ID:  D2-008
 Stability:    Beta
 Given:        A running agent with an on_start hook that raises ValueError("hook failure")
 When:         lifecycle_manager.invoke(agent_id, task_id=<uuid>, actor="user@example.com")
-Then:         AgentKit.LifecycleHookError is raised
+Then:         AgentPave.LifecycleHookError is raised
               Agent remains in REGISTERED state (transition aborted)
               No TransitionRecord written for the failed transition
 Pass:         LifecycleHookError raised, context["hook_name"]=="on_start",
               context["cause"] contains "hook failure",
               agent.lifecycle_state == "REGISTERED"
 Fail:         Agent transitions to RUNNING despite hook failure, or state changes
-Error raised: AgentKit.LifecycleHookError
+Error raised: AgentPave.LifecycleHookError
 
 ---
 
@@ -835,19 +835,19 @@ An audit log that can be edited is not an audit log. Using a database with UPDAT
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph
+### 15.1 AgentPave-LangGraph
 - LangGraph's native interrupt() mechanism maps to PAUSED state — use it for HITL pause points
 - LangGraph's `SqliteSaver`/`PostgresSaver` can back the TransitionRecord audit log
 - State transitions should wrap LangGraph's `update_state()` call inside the atomic transition block
 
-### 15.2 AgentKit-MAF
+### 15.2 AgentPave-MAF
 - MAF's actor model maps naturally to lifecycle states — each actor has an active/inactive concept
 - Use Azure Cosmos DB change feed for append-only TransitionRecord storage
 - MAF's built-in OpenTelemetry emits lifecycle events automatically — wire to TransitionRecord writes
 
 ### 15.3 Known Divergences
 
-| Behaviour | AgentKit-LangGraph | AgentKit-MAF | Impact |
+| Behaviour | AgentPave-LangGraph | AgentPave-MAF | Impact |
 |---|---|---|---|
 | Pause mechanism | LangGraph interrupt() | MAF actor suspension | None — observable state identical |
 | Audit log store | SqliteSaver / PostgresSaver | Cosmos DB change feed | None — record schema identical |
@@ -872,4 +872,4 @@ An audit log that can be edited is not an audit log. Using a database with UPDAT
 
 ---
 
-*AgentKit Dimension 2 — Lifecycle — v1.1*
+*AgentPave Dimension 2 — Lifecycle — v1.1*

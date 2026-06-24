@@ -6,9 +6,9 @@
 
 ## What is AgentPave?
 
-AgentKit is a **concept-first, runtime-agnostic framework** that gives developers a simple, standardised, and extensible way to create, run, and manage AI agents.
+AgentPave is a **concept-first, runtime-agnostic framework** that gives developers a simple, standardised, and extensible way to create, run, and manage AI agents.
 
-You define your agent once. AgentKit runs it on **LangGraph** or **MAF** — your choice.
+You define your agent once. AgentPave runs it on **LangGraph** or **MAF** — your choice.
 
 ```
 [ Your Agent Definition ]
@@ -28,7 +28,7 @@ Any Cloud  Any Cloud     ← cloud agnostic
 
 Every agent framework today makes you choose a runtime and live with its opinions. LangGraph is powerful but complex. MAF is enterprise-grade but Azure-first. CrewAI is fast but hits walls in production.
 
-AgentKit sits **above** all of them. It gives you:
+AgentPave sits **above** all of them. It gives you:
 
 - A **clean agent definition model** — declare what your agent is, not how it runs
 - **Runtime portability** — swap LangGraph for MAF without touching your agent code
@@ -52,9 +52,9 @@ AgentKit sits **above** all of them. It gives you:
 
 ---
 
-## What AgentKit Covers
+## What AgentPave Covers
 
-AgentKit is built around **13 dimensions** — the complete set of concerns every production agent framework must address.
+AgentPave is built around **13 dimensions** — the complete set of concerns every production agent framework must address.
 
 | # | Dimension | What it solves |
 |---|---|---|
@@ -78,8 +78,8 @@ AgentKit is built around **13 dimensions** — the complete set of concerns ever
 
 | Implementation | Runtime | Language |
 |---|---|---|
-| **AgentKit-LangGraph** | LangGraph | Python |
-| **AgentKit-MAF** | Microsoft Agent Framework | Python + .NET |
+| **AgentPave-LangGraph** | LangGraph | Python |
+| **AgentPave-MAF** | Microsoft Agent Framework | Python + .NET |
 
 The same agent definition runs on both. If it doesn't — the spec has a gap.
 
@@ -87,22 +87,22 @@ The same agent definition runs on both. If it doesn't — the spec has a gap.
 
 ## Extensions
 
-AgentKit is extensible by design. Official extensions plug into defined extension points.
+AgentPave is extensible by design. Official extensions plug into defined extension points.
 
 | Extension | Purpose | Priority |
 |---|---|---|
-| AgentKit-Observe | OpenTelemetry backend integration | Release 1 |
-| AgentKit-Eval | Evaluation + CI/CD + production feedback loop | Release 1 |
-| AgentKit-HITL | Human-in-the-loop approval workflows | Release 1 |
-| AgentKit-MultiAgent | Agent-to-agent coordination | Release 2 |
-| AgentKit-Cache | Semantic + prompt caching | Release 2 |
-| AgentKit-Memory | Memory consolidation | Release 2 |
-| AgentKit-Govern | EU AI Act, SOC2, HIPAA, GDPR adapters | Release 3 |
-| AgentKit-Marketplace | Agent registry and discovery | Release 3 |
+| AgentPave-Observe | OpenTelemetry backend integration | Release 1 |
+| AgentPave-Eval | Evaluation + CI/CD + production feedback loop | Release 1 |
+| AgentPave-HITL | Human-in-the-loop approval workflows | Release 1 |
+| AgentPave-MultiAgent | Agent-to-agent coordination | Release 2 |
+| AgentPave-Cache | Semantic + prompt caching | Release 2 |
+| AgentPave-Memory | Memory consolidation | Release 2 |
+| AgentPave-Govern | EU AI Act, SOC2, HIPAA, GDPR adapters | Release 3 |
+| AgentPave-Marketplace | Agent registry and discovery | Release 3 |
 
 ---
 
-## What AgentKit is NOT
+## What AgentPave is NOT
 
 - Not a cloud platform — no managed infrastructure
 - Not a UI or drag-and-drop builder
@@ -116,10 +116,10 @@ AgentKit is extensible by design. Official extensions plug into defined extensio
 
 | Document | Description |
 |---|---|
-| [Baseline Structure](docs/BASELINE.md) | The complete, versioned AgentKit structure — the north star document |
-| AgentKit Spec v1.0 | *(coming soon)* Full specification for implementers |
-| AgentKit-LangGraph Guide | *(coming soon)* Building agents with the LangGraph implementation |
-| AgentKit-MAF Guide | *(coming soon)* Building agents with the MAF implementation |
+| [Baseline Structure](docs/BASELINE.md) | The complete, versioned AgentPave structure — the north star document |
+| AgentPave Spec v1.0 | *(coming soon)* Full specification for implementers |
+| AgentPave-LangGraph Guide | *(coming soon)* Building agents with the LangGraph implementation |
+| AgentPave-MAF Guide | *(coming soon)* Building agents with the MAF implementation |
 
 ---
 
@@ -128,15 +128,15 @@ AgentKit is extensible by design. Official extensions plug into defined extensio
 | Item | Status |
 |---|---|
 | Baseline Structure | ✅ v1.0 — Baselined June 2026 |
-| AgentKit Spec | 🔄 In Progress |
-| AgentKit-LangGraph | 📅 Planned |
-| AgentKit-MAF | 📅 Planned |
+| AgentPave Spec | 🔄 In Progress |
+| AgentPave-LangGraph | 📅 Planned |
+| AgentPave-MAF | 📅 Planned |
 
 ---
 
 ## Contributing
 
-AgentKit is concept-first. The most valuable contributions right now are:
+AgentPave is concept-first. The most valuable contributions right now are:
 
 - Feedback on the [Baseline Structure](docs/BASELINE.md)
 - Gaps you've experienced building agents in production that the spec doesn't address
@@ -144,4 +144,4 @@ AgentKit is concept-first. The most valuable contributions right now are:
 
 ---
 
-*AgentKit — Build agents, not plumbing.*
+*AgentPave — Build agents, not plumbing.*

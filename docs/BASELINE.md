@@ -1,4 +1,4 @@
-# AgentKit — Baseline Structure v1.0
+# AgentPave — Baseline Structure v1.0
 
 **Baselined:** June 2026  
 **Status:** Approved for Spec Writing  
@@ -9,7 +9,7 @@
 
 ## The One-Line Definition
 
-> AgentKit is a concept-first, runtime-agnostic framework that gives developers a simple, standardised, and extensible way to create, run, and manage AI agents — regardless of the underlying runtime or cloud provider.
+> AgentPave is a concept-first, runtime-agnostic framework that gives developers a simple, standardised, and extensible way to create, run, and manage AI agents — regardless of the underlying runtime or cloud provider.
 
 ---
 
@@ -220,27 +220,27 @@ Declared → Registered → Running → Paused → Resumed → Retired
 
 ## Extension Registry
 
-Extensions are official AgentKit modules that plug into defined extension points. They are versioned, optional, and independently deployable.
+Extensions are official AgentPave modules that plug into defined extension points. They are versioned, optional, and independently deployable.
 
 ### Priority 1 — Ship with first release
 | Extension | Purpose |
 |---|---|
-| **AgentKit-Observe** | OpenTelemetry backend integration |
-| **AgentKit-Eval** | Evaluation framework + CI/CD integration + feedback loop |
-| **AgentKit-HITL** | Human-in-the-loop approval workflows |
+| **AgentPave-Observe** | OpenTelemetry backend integration |
+| **AgentPave-Eval** | Evaluation framework + CI/CD integration + feedback loop |
+| **AgentPave-HITL** | Human-in-the-loop approval workflows |
 
 ### Priority 2 — Ship with second release
 | Extension | Purpose |
 |---|---|
-| **AgentKit-MultiAgent** | Agent-to-agent coordination layer |
-| **AgentKit-Cache** | Semantic caching + prompt caching |
-| **AgentKit-Memory** | Memory consolidation (async between-session processing) |
+| **AgentPave-MultiAgent** | Agent-to-agent coordination layer |
+| **AgentPave-Cache** | Semantic caching + prompt caching |
+| **AgentPave-Memory** | Memory consolidation (async between-session processing) |
 
 ### Priority 3 — Ship with third release
 | Extension | Purpose |
 |---|---|
-| **AgentKit-Govern** | Compliance adapters — EU AI Act, SOC2, HIPAA, GDPR |
-| **AgentKit-Marketplace** | Agent registry and discovery |
+| **AgentPave-Govern** | Compliance adapters — EU AI Act, SOC2, HIPAA, GDPR |
+| **AgentPave-Marketplace** | Agent registry and discovery |
 
 ---
 
@@ -250,14 +250,14 @@ Two reference implementations prove the spec works across runtimes.
 
 | Implementation | Runtime | Language | Status |
 |---|---|---|---|
-| **AgentKit-LangGraph** | LangGraph | Python | Planned |
-| **AgentKit-MAF** | Microsoft Agent Framework | Python + .NET | Planned |
+| **AgentPave-LangGraph** | LangGraph | Python | Planned |
+| **AgentPave-MAF** | Microsoft Agent Framework | Python + .NET | Planned |
 
 > The same agent definition must run on both implementations without modification. If it doesn't, the spec has a gap.
 
 ---
 
-## What AgentKit is NOT
+## What AgentPave is NOT
 
 - Not a cloud platform — no managed infrastructure
 - Not a UI builder — no drag and drop
@@ -277,4 +277,4 @@ Two reference implementations prove the spec works across runtimes.
 
 ---
 
-*This document is the baseline. It is the north star for the AgentKit Spec, all reference implementations, and all extensions.*
+*This document is the baseline. It is the north star for the AgentPave Spec, all reference implementations, and all extensions.*

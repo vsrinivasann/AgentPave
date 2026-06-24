@@ -1,10 +1,10 @@
-# AgentKit Dimension 1 — Identity
+# AgentPave Dimension 1 — Identity
 
 **Spec version:** 1.1  
 **Stability:** Beta  
 **Depends on:** None — this is the root dimension  
 **Required by:** All other dimensions  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 
 ---
 
@@ -34,9 +34,9 @@
 
 ### 1.1 Purpose
 
-Identity is the root of everything in AgentKit. Every agent must have a stable, unique, cryptographically verifiable identity before it can exist in the system. Every other dimension — Lifecycle, Communication, Memory, Observability, Reliability — references an agent by its Identity. Without a well-defined identity model, no operation in AgentKit has a reliable anchor.
+Identity is the root of everything in AgentPave. Every agent must have a stable, unique, cryptographically verifiable identity before it can exist in the system. Every other dimension — Lifecycle, Communication, Memory, Observability, Reliability — references an agent by its Identity. Without a well-defined identity model, no operation in AgentPave has a reliable anchor.
 
-Identity in AgentKit serves three distinct purposes:
+Identity in AgentPave serves three distinct purposes:
 
 1. **Addressability** — every agent can be uniquely and unambiguously referenced across all dimensions, all runtimes, and all time
 2. **Traceability** — every action, log entry, span, checkpoint, and error is linked to a specific agent identity
@@ -63,7 +63,7 @@ If Identity is implemented incorrectly:
 - Generating and associating a cryptographic runtime identity (SPIFFE ID + JWT) with every agent instance
 - Storing agent metadata in the Agent Registry
 - Looking up an agent by Agent ID
-- Validating an agent definition against agentkit-schema.json
+- Validating an agent definition against agentpave-schema.json
 - Retiring (deactivating) an agent identity
 
 ### 2.2 Out of Scope
@@ -99,15 +99,15 @@ Terms specific to this dimension. All terms from the master spec Glossary also a
 
 | Term | Definition |
 |---|---|
-| **Agent Declaration** | The act of submitting a valid Agent Definition to AgentKit, resulting in an Agent ID being assigned. Declaration is the first step in the agent lifecycle. |
-| **Agent Definition** | The complete, runtime-agnostic, declarative description of an agent. Must conform to agentkit-schema.json. Immutable after registration. |
+| **Agent Declaration** | The act of submitting a valid Agent Definition to AgentPave, resulting in an Agent ID being assigned. Declaration is the first step in the agent lifecycle. |
+| **Agent Definition** | The complete, runtime-agnostic, declarative description of an agent. Must conform to agentpave-schema.json. Immutable after registration. |
 | **Agent ID** | A UUID v4 string. Globally unique. Assigned at declaration time. Immutable. Never reused. The primary key for every agent in the Agent Registry. |
-| **Agent Registry** | The authoritative, append-only store of all declared agents and their metadata. The single source of truth for agent identity in AgentKit. |
+| **Agent Registry** | The authoritative, append-only store of all declared agents and their metadata. The single source of truth for agent identity in AgentPave. |
 | **Agent Metadata** | The descriptive fields associated with an agent: `name`, `version`, `owner`, `purpose`, `domain`, `tags`, `llm_interface_version`, `created_at`. |
-| **SPIFFE ID** | A Secure Production Identity Framework For Everyone identifier. Format: `spiffe://<trust-domain>/agentkit/<agent_id>/<instance_id>`. Issued at agent spawn. Cryptographically verifiable. Never reused across instances. |
+| **SPIFFE ID** | A Secure Production Identity Framework For Everyone identifier. Format: `spiffe://<trust-domain>/agentpave/<agent_id>/<instance_id>`. Issued at agent spawn. Cryptographically verifiable. Never reused across instances. |
 | **Instance ID** | A UUID v4 generated fresh at every agent spawn (every transition to RUNNING). Included in the SPIFFE ID path to ensure two concurrent instances of the same agent have distinct cryptographic identities. |
 | **Runtime Token** | A short-lived JWT bound to the agent's SPIFFE ID. Default TTL: 5 minutes. Scoped to a specific task. Used for Zero Trust authentication in all inter-system calls. |
-| **Trust Domain** | The SPIFFE trust domain for the AgentKit deployment. Example: `agentkit.example.com`. Configured at deployment time via `AGENTKIT_TRUST_DOMAIN` environment variable. |
+| **Trust Domain** | The SPIFFE trust domain for the AgentPave deployment. Example: `agentpave.example.com`. Configured at deployment time via `AGENTKIT_TRUST_DOMAIN` environment variable. |
 | **Agent Version** | A SemVer string (e.g. `1.2.0`) declaring the version of the agent's definition. Must be incremented whenever the agent definition changes in any way. |
 | **Owner** | The entity responsible for this agent. Format: email address (user@example.com) or team path (eng/platform/agents). Used for governance, alerts, and retirement authorisation. |
 | **Domain** | The functional domain this agent operates in. Format: lowercase, alphanumeric, hyphen-separated, max 64 chars. Examples: `finance`, `customer-support`, `data-engineering`. |
@@ -118,7 +118,7 @@ Terms specific to this dimension. All terms from the master spec Glossary also a
 
 ## 5. Data Models
 
-All data models are canonical. The JSON Schema at `/schema/agentkit-schema.json` is authoritative — this prose describes it. Where conflict exists, the JSON Schema wins.
+All data models are canonical. The JSON Schema at `/schema/agentpave-schema.json` is authoritative — this prose describes it. Where conflict exists, the JSON Schema wins.
 
 ### 5.1 ReliabilityContract
 
@@ -159,7 +159,7 @@ class ReliabilityContract(BaseModel):
         description=(
             "Minimum acceptable quality score [0.0–1.0]. "
             "Outputs scoring below this threshold raise "
-            "AgentKit.ReliabilityContractViolationError."
+            "AgentPave.ReliabilityContractViolationError."
         )
     )
     domain_notes: Optional[str] = Field(
@@ -246,7 +246,7 @@ TAG_PATTERN = re.compile(r'^[a-z0-9][a-z0-9-]{0,30}[a-z0-9]$|^[a-z0-9]$')
 class AgentDefinition(BaseModel):
     """
     The complete, declarative description of an agent.
-    Runtime-agnostic. Validated against agentkit-schema.json.
+    Runtime-agnostic. Validated against agentpave-schema.json.
     Immutable after registration.
 
     No undeclared fields are permitted (extra = 'forbid').
@@ -435,7 +435,7 @@ class AgentRecord(BaseModel):
     spiffe_id: str = Field(
         ...,
         description=(
-            "SPIFFE ID. Format: spiffe://<trust_domain>/agentkit/<agent_id>/<instance_id>. "
+            "SPIFFE ID. Format: spiffe://<trust_domain>/agentpave/<agent_id>/<instance_id>. "
             "IMMUTABLE."
         )
     )
@@ -507,7 +507,7 @@ class RuntimeToken(BaseModel):
         ...,
         description=(
             "Signed JWT string. Bound to agent's private key via RS256. "
-            "Verified using the AgentKit trust domain's public key. "
+            "Verified using the AgentPave trust domain's public key. "
             "Never log or transmit this value in plaintext."
         )
     )
@@ -603,7 +603,7 @@ valid_agent_definition = {
 ```python
 expected_agent_record_structure = {
     "agent_id": "<UUID v4>",                    # e.g. "f47ac10b-58cc-4372-a567-0e02b2c3d479"
-    "spiffe_id": "spiffe://agentkit.local/agentkit/<agent_id>/<instance_id>",
+    "spiffe_id": "spiffe://agentpave.local/agentpave/<agent_id>/<instance_id>",
     "definition": valid_agent_definition,        # exact copy of submitted definition
     "definition_hash": "<64-char lowercase hex SHA-256>",
     "lifecycle_state": "DECLARED",
@@ -646,9 +646,9 @@ from abc import ABC, abstractmethod
 
 class AgentRegistry(ABC):
     """
-    The authoritative, append-only store of all AgentKit agents.
+    The authoritative, append-only store of all AgentPave agents.
 
-    Every conformant AgentKit implementation MUST provide a concrete
+    Every conformant AgentPave implementation MUST provide a concrete
     implementation of this interface.
 
     Contract rules:
@@ -676,7 +676,7 @@ class AgentRegistry(ABC):
            If collision persists after retry, raise DuplicateAgentIDError.
         4. Generate instance_id (UUID v4).
         5. Construct SPIFFE ID:
-           spiffe://<AGENTKIT_TRUST_DOMAIN>/agentkit/<agent_id>/<instance_id>
+           spiffe://<AGENTKIT_TRUST_DOMAIN>/agentpave/<agent_id>/<instance_id>
         6. Compute definition_hash:
            sha256(rfc8785_canonicalize(definition.model_dump())).hexdigest()
         7. Set created_at and updated_at to current UTC time (ISO 8601).
@@ -685,9 +685,9 @@ class AgentRegistry(ABC):
         10. Return the created AgentRecord.
 
         Raises:
-            AgentKit.InvalidAgentDefinitionError: Definition fails schema validation.
+            AgentPave.InvalidAgentDefinitionError: Definition fails schema validation.
                 context = {"validation_errors": [list of str]}
-            AgentKit.DuplicateAgentIDError: UUID v4 collision after one retry.
+            AgentPave.DuplicateAgentIDError: UUID v4 collision after one retry.
                 context = {"agent_id": str}
                 Note: Probability ~1 in 5.3×10^36 per attempt.
                       Retry once automatically before raising.
@@ -700,7 +700,7 @@ class AgentRegistry(ABC):
         Retrieve an agent record by Agent ID.
 
         Raises:
-            AgentKit.AgentNotFoundError: agent_id not in registry.
+            AgentPave.AgentNotFoundError: agent_id not in registry.
                 context = {"agent_id": agent_id}
             ValueError: agent_id is not a valid UUID v4 string.
         """
@@ -727,10 +727,10 @@ class AgentRegistry(ABC):
         Not part of the public developer API.
 
         Raises:
-            AgentKit.AgentNotFoundError: agent_id not in registry.
-            AgentKit.RetiredAgentError: agent is already RETIRED.
+            AgentPave.AgentNotFoundError: agent_id not in registry.
+            AgentPave.RetiredAgentError: agent is already RETIRED.
                 context = {"agent_id": str, "retired_at": str}
-            AgentKit.InvalidStateTransitionError: transition is invalid per D2 rules.
+            AgentPave.InvalidStateTransitionError: transition is invalid per D2 rules.
                 context = {"from_state": str, "to_state": str}
         """
         ...
@@ -780,8 +780,8 @@ class IdentityService(ABC):
             ttl_seconds: Token lifetime. Range: [60, 3600]. Default: 300.
 
         Raises:
-            AgentKit.AgentNotFoundError: agent_id not in registry.
-            AgentKit.RetiredAgentError: agent is RETIRED.
+            AgentPave.AgentNotFoundError: agent_id not in registry.
+            AgentPave.RetiredAgentError: agent is RETIRED.
             ValueError: scope is empty, or ttl_seconds outside [60, 3600].
         """
         ...
@@ -795,7 +795,7 @@ class IdentityService(ABC):
 
         Raises:
             ValueError: Token expired, not renewable, or renewal_count >= 11.
-            AgentKit.RetiredAgentError: Agent RETIRED since token was issued.
+            AgentPave.RetiredAgentError: Agent RETIRED since token was issued.
         """
         ...
 
@@ -825,7 +825,7 @@ class IdentityService(ABC):
 
 **THE SYSTEM SHALL** set `lifecycle_state` to `DECLARED` on every new AgentRecord.
 
-**WHEN** a declaration request contains a `name`+`version`+`owner` combination already present in the registry **THE SYSTEM SHALL** reject the request with `AgentKit.InvalidAgentDefinitionError` with `context = {"reason": "duplicate_name_version_owner"}`.
+**WHEN** a declaration request contains a `name`+`version`+`owner` combination already present in the registry **THE SYSTEM SHALL** reject the request with `AgentPave.InvalidAgentDefinitionError` with `context = {"reason": "duplicate_name_version_owner"}`.
 
 ### 8.2 Agent ID Immutability
 
@@ -839,7 +839,7 @@ class IdentityService(ABC):
 
 **THE SYSTEM SHALL** generate a SPIFFE ID at every agent spawn using this exact format:
 ```
-spiffe://<AGENTKIT_TRUST_DOMAIN>/agentkit/<agent_id>/<instance_id>
+spiffe://<AGENTKIT_TRUST_DOMAIN>/agentpave/<agent_id>/<instance_id>
 ```
 Where `AGENTKIT_TRUST_DOMAIN` is read from the `AGENTKIT_TRUST_DOMAIN` environment variable, and `instance_id` is a UUID v4 generated fresh for each spawn.
 
@@ -847,7 +847,7 @@ Where `AGENTKIT_TRUST_DOMAIN` is read from the `AGENTKIT_TRUST_DOMAIN` environme
 
 **WHEN** a Runtime Token's TTL expires during a long-running task **THE SYSTEM SHALL** renew the token (if `renewable=True` and `renewal_count < 11`) before the agent proceeds to its next step.
 
-**WHEN** `renewal_count == 11` and the token has expired **THE SYSTEM SHALL** terminate the task, raise `AgentKit.BudgetExceededError` with `context = {"reason": "token_renewal_limit_reached"}`, and transition the agent to PAUSED state pending explicit restart.
+**WHEN** `renewal_count == 11` and the token has expired **THE SYSTEM SHALL** terminate the task, raise `AgentPave.BudgetExceededError` with `context = {"reason": "token_renewal_limit_reached"}`, and transition the agent to PAUSED state pending explicit restart.
 
 ### 8.4 Agent Registry Durability
 
@@ -863,7 +863,7 @@ Where `AGENTKIT_TRUST_DOMAIN` is read from the `AGENTKIT_TRUST_DOMAIN` environme
 
 ### ALWAYS — Must always do these, no exceptions
 
-- Validate every AgentDefinition against agentkit-schema.json before assigning an Agent ID
+- Validate every AgentDefinition against agentpave-schema.json before assigning an Agent ID
 - Assign a UUID v4 Agent ID — never an integer, slug, or human-readable string
 - Generate a SPIFFE ID for every declared agent
 - Compute and store SHA-256 RFC-8785-canonical definition_hash at declaration time
@@ -892,19 +892,19 @@ Where `AGENTKIT_TRUST_DOMAIN` is read from the `AGENTKIT_TRUST_DOMAIN` environme
 
 ## 10. Error Handling
 
-All errors are `AgentKitError` subclasses as defined in SPEC.md Section 7.
+All errors are `AgentPaveError` subclasses as defined in SPEC.md Section 7.
 
 | Scenario | Error Type | Recoverable | Required context fields |
 |---|---|---|---|
-| Definition fails Pydantic schema validation | `AgentKit.InvalidAgentDefinitionError` | No — fix the definition | `validation_errors: list[str]` |
-| name+version+owner combination already exists | `AgentKit.InvalidAgentDefinitionError` | No — bump version | `reason: "duplicate_name_version_owner"` |
-| per_task > per_day in token_budget | `AgentKit.InvalidAgentDefinitionError` | No — fix the budget | `reason: "invalid_token_budget"` |
-| Generated UUID v4 already exists in registry | `AgentKit.DuplicateAgentIDError` | Yes — retry once automatically | `agent_id: str` |
-| agent_id not found in registry | `AgentKit.AgentNotFoundError` | No — check the caller | `agent_id: str` |
-| Operation on a RETIRED agent | `AgentKit.RetiredAgentError` | No | `agent_id: str, retired_at: str` |
-| Token renewal_count == 11 and token expired | `AgentKit.BudgetExceededError` | No — task must restart | `reason: "token_renewal_limit_reached"` |
-| Attempted modification of immutable field | `AttributeError` (not AgentKitError) | No — fix the caller | — |
-| agent_id argument is not a valid UUID v4 | `ValueError` (not AgentKitError) | No — fix the caller | — |
+| Definition fails Pydantic schema validation | `AgentPave.InvalidAgentDefinitionError` | No — fix the definition | `validation_errors: list[str]` |
+| name+version+owner combination already exists | `AgentPave.InvalidAgentDefinitionError` | No — bump version | `reason: "duplicate_name_version_owner"` |
+| per_task > per_day in token_budget | `AgentPave.InvalidAgentDefinitionError` | No — fix the budget | `reason: "invalid_token_budget"` |
+| Generated UUID v4 already exists in registry | `AgentPave.DuplicateAgentIDError` | Yes — retry once automatically | `agent_id: str` |
+| agent_id not found in registry | `AgentPave.AgentNotFoundError` | No — check the caller | `agent_id: str` |
+| Operation on a RETIRED agent | `AgentPave.RetiredAgentError` | No | `agent_id: str, retired_at: str` |
+| Token renewal_count == 11 and token expired | `AgentPave.BudgetExceededError` | No — task must restart | `reason: "token_renewal_limit_reached"` |
+| Attempted modification of immutable field | `AttributeError` (not AgentPaveError) | No — fix the caller | — |
+| agent_id argument is not a valid UUID v4 | `ValueError` (not AgentPaveError) | No — fix the caller | — |
 
 ---
 
@@ -923,7 +923,7 @@ Then:         An AgentRecord is returned where:
               - definition == valid_agent_definition (exact field match)
               - definition_hash == sha256(rfc8785_canonicalize(definition)).hexdigest()
               - created_at is a valid ISO 8601 UTC string
-              - spiffe_id matches "spiffe://<trust_domain>/agentkit/<agent_id>/<uuid4>"
+              - spiffe_id matches "spiffe://<trust_domain>/agentpave/<agent_id>/<uuid4>"
 Pass:         All conditions above are True
 Fail:         Any condition is False or any field is null/missing
 Error raised: None
@@ -943,7 +943,7 @@ Pass:         AgentRecord returned, agent_id != "test-collision-uuid",
               agent_id is a valid UUID v4
 Fail:         DuplicateAgentIDError raised (should only raise after 2 collisions),
               or first colliding UUID is used
-Error raised: None on first collision (retry). AgentKit.DuplicateAgentIDError on second.
+Error raised: None on first collision (retry). AgentPave.DuplicateAgentIDError on second.
 
 ---
 
@@ -951,12 +951,12 @@ Criteria ID:  D1-003
 Stability:    Beta
 Given:        An AgentDefinition with version="not-semver" (invalid version)
 When:         AgentRegistry.register(AgentDefinition(**invalid_definition)) is called
-Then:         AgentKit.InvalidAgentDefinitionError is raised. No Agent ID is assigned.
+Then:         AgentPave.InvalidAgentDefinitionError is raised. No Agent ID is assigned.
 Pass:         InvalidAgentDefinitionError raised,
               context["validation_errors"] is a non-empty list of strings,
               registry.exists() returns False for any new agent_id
 Fail:         Agent ID assigned, or different error raised, or validation_errors is empty
-Error raised: AgentKit.InvalidAgentDefinitionError
+Error raised: AgentPave.InvalidAgentDefinitionError
 
 ---
 
@@ -976,11 +976,11 @@ Criteria ID:  D1-005
 Stability:    Beta
 Given:        No agent exists with agent_id="00000000-0000-0000-0000-000000000000"
 When:         AgentRegistry.get(agent_id="00000000-0000-0000-0000-000000000000") is called
-Then:         AgentKit.AgentNotFoundError is raised
+Then:         AgentPave.AgentNotFoundError is raised
 Pass:         AgentNotFoundError raised,
               context["agent_id"] == "00000000-0000-0000-0000-000000000000"
 Fail:         No error raised, None returned, or different error raised
-Error raised: AgentKit.AgentNotFoundError
+Error raised: AgentPave.AgentNotFoundError
 
 ---
 
@@ -993,7 +993,7 @@ Pass:         AttributeError raised, agent_record.agent_id == <known_uuid> (unch
 Fail:         agent_id is modified successfully
 Error raised: AttributeError
 Note:         AttributeError is the correct error here — immutability is enforced at the
-              Python model level, not by AgentKit error handling.
+              Python model level, not by AgentPave error handling.
 
 ---
 
@@ -1025,11 +1025,11 @@ Stability:    Beta
 Given:        An AgentDefinition with token_budget.per_task=10000, token_budget.per_day=5000
               (per_task > per_day — invalid)
 When:         AgentRegistry.register(AgentDefinition(**invalid_budget_definition)) is called
-Then:         AgentKit.InvalidAgentDefinitionError is raised
+Then:         AgentPave.InvalidAgentDefinitionError is raised
 Pass:         InvalidAgentDefinitionError raised,
               context["reason"] == "invalid_token_budget"
 Fail:         Agent registered, or different error raised
-Error raised: AgentKit.InvalidAgentDefinitionError
+Error raised: AgentPave.InvalidAgentDefinitionError
 
 ---
 
@@ -1037,12 +1037,12 @@ Criteria ID:  D1-009
 Stability:    Beta
 Given:        A registered agent with lifecycle_state=RETIRED
 When:         IdentityService.issue_token(agent_id=<retired_agent_id>, ...) is called
-Then:         AgentKit.RetiredAgentError is raised
+Then:         AgentPave.RetiredAgentError is raised
 Pass:         RetiredAgentError raised,
               context["agent_id"] == <retired_agent_id>,
               context["retired_at"] is a valid ISO 8601 UTC string
 Fail:         Token issued, or different error raised
-Error raised: AgentKit.RetiredAgentError
+Error raised: AgentPave.RetiredAgentError
 
 ---
 
@@ -1050,11 +1050,11 @@ Criteria ID:  D1-010
 Stability:    Beta
 Given:        An AgentDefinition dict with an extra undeclared field: {"unknown_field": "value"}
 When:         AgentDefinition(**definition_with_extra_field) is instantiated
-Then:         AgentKit.InvalidAgentDefinitionError is raised (wrapping Pydantic ValidationError)
+Then:         AgentPave.InvalidAgentDefinitionError is raised (wrapping Pydantic ValidationError)
 Pass:         InvalidAgentDefinitionError raised,
               context["validation_errors"] mentions the undeclared field
 Fail:         AgentDefinition created with extra field, or field silently ignored
-Error raised: AgentKit.InvalidAgentDefinitionError
+Error raised: AgentPave.InvalidAgentDefinitionError
 
 ---
 
@@ -1094,7 +1094,7 @@ A dimension is complete if and only if every item below is checked. An autonomou
 - [ ] All 11 acceptance criteria pass: D1-001 through D1-011
 - [ ] All relevant invariants verified: INV-001, INV-008, INV-013, INV-014, INV-015
 - [ ] Declaration time p99 latency < 100ms (NFR from SPEC.md Section 8.1)
-- [ ] All errors raised are `AgentKitError` subclasses (except AttributeError and ValueError for model-level guards)
+- [ ] All errors raised are `AgentPaveError` subclasses (except AttributeError and ValueError for model-level guards)
 
 ---
 
@@ -1198,26 +1198,26 @@ Using `json.dumps(definition.dict())` without RFC 8785 canonicalisation produces
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph
+### 15.1 AgentPave-LangGraph
 
 - Use LangGraph's `SqliteSaver` (dev) or `PostgresSaver` (prod) as the durable registry backing store
 - SPIFFE ID generation uses the `spiffe` Python library (pip: `spiffe`)
 - JWT operations use `python-jose[cryptography]` with RS256 signing
 - RFC 8785 canonical JSON uses `canonicaljson` library (pip: `canonicaljson`)
-- Trust domain: `AGENTKIT_TRUST_DOMAIN` environment variable (default: `agentkit.local`)
+- Trust domain: `AGENTKIT_TRUST_DOMAIN` environment variable (default: `agentpave.local`)
 - AgentDefinition validation should occur before any LangGraph graph is constructed
 
-### 15.2 AgentKit-MAF
+### 15.2 AgentPave-MAF
 
 - Use in-memory store (dev) or Azure Cosmos DB (prod) as the durable registry backing store
 - SPIFFE identity generation is independent of MAF's actor model — implement as a standalone service
 - JWT operations: `System.IdentityModel.Tokens.Jwt` (.NET) or `python-jose` (Python)
 - RFC 8785 canonical JSON: `rfc8785` Python library or `JsonCanonicalization` NuGet package (.NET)
-- Trust domain: `AgentKit:TrustDomain` app setting (default: `agentkit.local`)
+- Trust domain: `AgentPave:TrustDomain` app setting (default: `agentpave.local`)
 
 ### 15.3 Known Divergences Between Implementations
 
-| Behaviour | AgentKit-LangGraph | AgentKit-MAF | Conformance impact |
+| Behaviour | AgentPave-LangGraph | AgentPave-MAF | Conformance impact |
 |---|---|---|---|
 | Default registry backend | SqliteSaver | In-memory / Cosmos DB | None — observable behaviour identical |
 | JWT library | python-jose | System.IdentityModel.Tokens.Jwt | None — JWT format identical |
@@ -1247,4 +1247,4 @@ All divergences are implementation details. Observable behaviour (Agent IDs, rec
 
 ---
 
-*AgentKit Dimension 1 — Identity — v1.1*
+*AgentPave Dimension 1 — Identity — v1.1*

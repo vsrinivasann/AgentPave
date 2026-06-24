@@ -1,10 +1,10 @@
-# AgentKit Dimension 10 — Developer Experience
+# AgentPave Dimension 10 — Developer Experience
 
 **Spec version:** 1.1  
 **Stability:** Alpha  
 **Depends on:** D1–D9  
 **Required by:** Nothing in Release 2  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 **Target Release:** Release 2  
 
 ---
@@ -35,7 +35,7 @@
 
 ### 1.1 Purpose
 
-A framework that is technically complete but painful to use will not be adopted. Developer Experience is a first-class concern in AgentKit — not an afterthought. The most sophisticated agent framework in the world is worthless if developers can't run their first agent in 5 minutes.
+A framework that is technically complete but painful to use will not be adopted. Developer Experience is a first-class concern in AgentPave — not an afterthought. The most sophisticated agent framework in the world is worthless if developers can't run their first agent in 5 minutes.
 
 D10 delivers five capabilities:
 1. **CLI** — scaffold, run, debug, and deploy agents from the terminal
@@ -54,11 +54,11 @@ The framework with the most production case studies has the fewest stars of the 
 
 ### 2.1 In Scope
 
-- `agentkit` CLI with commands: init, run, invoke, debug, deploy, validate
+- `agentpave` CLI with commands: init, run, invoke, debug, deploy, validate
 - Local runner that mirrors production behaviour (checkpoints, observability, lifecycle)
 - Local trace visualiser (terminal UI — no browser required)
 - Agent template system (built-in templates + community templates)
-- `agentkit validate` — validates AgentDefinition against spec before deployment
+- `agentpave validate` — validates AgentDefinition against spec before deployment
 - Shell completion (bash, zsh, fish)
 - VS Code extension spec (not the extension itself — interface contract only)
 
@@ -75,11 +75,11 @@ The framework with the most production case studies has the fewest stars of the 
 
 | Decision | Rationale |
 |---|---|
-| **5-minute hello world is a hard requirement** | SpringBoot succeeded partly because `spring init` + run was trivially fast. AgentKit must match this. Any setup that takes longer than 5 minutes loses developers. |
+| **5-minute hello world is a hard requirement** | SpringBoot succeeded partly because `spring init` + run was trivially fast. AgentPave must match this. Any setup that takes longer than 5 minutes loses developers. |
 | **Local runner is production-equivalent** | A local runner that behaves differently from production is a liability — it creates bugs that only surface after deployment. Local must be identical to production. |
 | **Terminal UI for trace visualiser** | Browser-based trace UIs require a running server, a port, and a browser. Terminal UI has zero external dependencies — it works in CI, SSH sessions, and Docker containers. |
 | **Templates are YAML-declared agent skeletons** | Code-generated templates become outdated. YAML-declared templates that render from the current spec are always up to date. |
-| **CLI is a Python package installable via pip** | Maximum reach. Developers who don't know Python can still install via `pip install agentkit-cli`. |
+| **CLI is a Python package installable via pip** | Maximum reach. Developers who don't know Python can still install via `pip install agentpave-cli`. |
 
 ---
 
@@ -87,14 +87,14 @@ The framework with the most production case studies has the fewest stars of the 
 
 | Term | Definition |
 |---|---|
-| **CLI** | Command-line interface. The `agentkit` command installed via pip. |
-| **Local Runner** | The component that executes an agent locally with full AgentKit behaviour. |
+| **CLI** | Command-line interface. The `agentpave` command installed via pip. |
+| **Local Runner** | The component that executes an agent locally with full AgentPave behaviour. |
 | **Local Trace Visualiser** | A terminal UI that renders agent execution traces in real time. |
-| **Agent Template** | A YAML-declared skeleton for a common agent pattern. Rendered into a working agent project by `agentkit init`. |
-| **Project** | A directory containing an AgentDefinition, tools, handlers, and configuration. Created by `agentkit init`. |
-| **AGENTS.md** | A markdown file at the project root that provides context for AI coding agents (Claude Code, Copilot etc.) about the AgentKit project structure. |
-| **Hello World Agent** | The simplest possible AgentKit agent — one tool, one task, completes in under 5 minutes from `pip install` to first successful run. |
-| **Validation** | The process of checking an AgentDefinition against the spec before deployment. Performed by `agentkit validate`. |
+| **Agent Template** | A YAML-declared skeleton for a common agent pattern. Rendered into a working agent project by `agentpave init`. |
+| **Project** | A directory containing an AgentDefinition, tools, handlers, and configuration. Created by `agentpave init`. |
+| **AGENTS.md** | A markdown file at the project root that provides context for AI coding agents (Claude Code, Copilot etc.) about the AgentPave project structure. |
+| **Hello World Agent** | The simplest possible AgentPave agent — one tool, one task, completes in under 5 minutes from `pip install` to first successful run. |
+| **Validation** | The process of checking an AgentDefinition against the spec before deployment. Performed by `agentpave validate`. |
 
 ---
 
@@ -109,7 +109,7 @@ from enum import Enum
 
 
 class CLICommandName(str, Enum):
-    INIT     = "init"      # Scaffold a new AgentKit project
+    INIT     = "init"      # Scaffold a new AgentPave project
     RUN      = "run"       # Run an agent locally (long-running)
     INVOKE   = "invoke"    # Send a single task to a running agent
     DEBUG    = "debug"     # Run with verbose trace output
@@ -162,7 +162,7 @@ class LocalRunConfig(BaseModel):
         description="Where to write traces: 'terminal', 'file', or 'none'."
     )
     checkpoint_dir: str = Field(
-        default=".agentkit/checkpoints",
+        default=".agentpave/checkpoints",
         description="Local directory for checkpoint storage."
     )
     log_level: str = Field(default="INFO", description="Log verbosity: DEBUG, INFO, WARNING, ERROR.")
@@ -209,20 +209,20 @@ class ValidationResult(BaseModel):
 
 ```bash
 # Step 1: Install (< 30 seconds)
-pip install agentkit-cli
+pip install agentpave-cli
 
 # Step 2: Scaffold a new project (< 10 seconds)
-agentkit init my-first-agent --template basic --runtime langgraph
+agentpave init my-first-agent --template basic --runtime langgraph
 
 # Step 3: Run locally (< 30 seconds)
 cd my-first-agent
-agentkit run
+agentpave run
 
 # Step 4: Invoke with a task (< 5 seconds)
-agentkit invoke "Search for information about AgentKit"
+agentpave invoke "Search for information about AgentPave"
 
 # Step 5: View the trace
-agentkit trace --last
+agentpave trace --last
 ```
 
 **Total: < 5 minutes from pip install to first successful agent run.**
@@ -232,7 +232,7 @@ agentkit trace --last
 ```
 my-first-agent/
 ├── AGENTS.md                    ← AI coding agent context file
-├── agentkit.yaml                ← AgentDefinition + runtime config
+├── agentpave.yaml                ← AgentDefinition + runtime config
 ├── handlers/
 │   └── deterministic.py         ← Deterministic task handlers
 ├── tools/
@@ -240,7 +240,7 @@ my-first-agent/
 ├── tests/
 │   ├── fixtures/                ← Evaluation fixtures
 │   └── test_agent.py            ← Test file
-└── .agentkit/
+└── .agentpave/
     ├── checkpoints/             ← Local checkpoint storage
     └── traces/                  ← Local trace storage
 ```
@@ -248,33 +248,33 @@ my-first-agent/
 ### 6.3 AGENTS.md Template
 
 ```markdown
-# AgentKit Project: my-first-agent
+# AgentPave Project: my-first-agent
 
 ## Project Structure
-This is an AgentKit project. Key files:
-- `agentkit.yaml`: Agent definition and configuration
+This is an AgentPave project. Key files:
+- `agentpave.yaml`: Agent definition and configuration
 - `handlers/`: Deterministic task handler functions
 - `tools/`: MCP tool Integration Contracts
 - `tests/`: Evaluation fixtures and test files
 
-## AgentKit Spec
-This project conforms to AgentKit Spec v1.1.1.
-Dimension specs: docs.agentkit.io/spec
+## AgentPave Spec
+This project conforms to AgentPave Spec v1.1.1.
+Dimension specs: docs.agentpave.io/spec
 
 ## Running Locally
-agentkit run          # Start the agent
-agentkit invoke "..."  # Send a task
-agentkit trace --last  # View last trace
+agentpave run          # Start the agent
+agentpave invoke "..."  # Send a task
+agentpave trace --last  # View last trace
 
 ## Testing
-agentkit eval         # Run evaluation suite
+agentpave eval         # Run evaluation suite
 ```
 
 ---
 
 ## 7. Interfaces & Contracts
 
-### 7.1 AgentKitCLI
+### 7.1 AgentPaveCLI
 
 ```python
 # CLI command specifications (all commands)
@@ -282,18 +282,18 @@ agentkit eval         # Run evaluation suite
 CLI_COMMANDS = [
     CLICommandSpec(
         name=CLICommandName.INIT,
-        description="Scaffold a new AgentKit project from a template.",
+        description="Scaffold a new AgentPave project from a template.",
         required_args=["project_name"],
         optional_flags=["--template (default: basic)", "--runtime (default: langgraph)", "--dir"],
-        example="agentkit init my-agent --template rag-agent --runtime langgraph",
+        example="agentpave init my-agent --template rag-agent --runtime langgraph",
         exit_codes={0: "success", 1: "invalid template", 2: "directory already exists"}
     ),
     CLICommandSpec(
         name=CLICommandName.RUN,
         description="Start the agent locally. Mirrors production behaviour.",
         required_args=[],
-        optional_flags=["--config (default: agentkit.yaml)", "--mock-tools", "--port"],
-        example="agentkit run --mock-tools",
+        optional_flags=["--config (default: agentpave.yaml)", "--mock-tools", "--port"],
+        example="agentpave run --mock-tools",
         exit_codes={0: "agent retired cleanly", 1: "startup error", 2: "validation failed"}
     ),
     CLICommandSpec(
@@ -301,7 +301,7 @@ CLI_COMMANDS = [
         description="Send a single task to a running agent and wait for result.",
         required_args=["task"],
         optional_flags=["--agent-id", "--timeout"],
-        example='agentkit invoke "Search for AgentKit documentation"',
+        example='agentpave invoke "Search for AgentPave documentation"',
         exit_codes={0: "task completed", 1: "task failed", 2: "agent not running"}
     ),
     CLICommandSpec(
@@ -309,15 +309,15 @@ CLI_COMMANDS = [
         description="Run agent with verbose step-by-step trace output.",
         required_args=[],
         optional_flags=["--breakpoint (pause at specific action types)"],
-        example="agentkit debug --breakpoint tool_call",
+        example="agentpave debug --breakpoint tool_call",
         exit_codes={0: "success", 1: "error"}
     ),
     CLICommandSpec(
         name=CLICommandName.VALIDATE,
-        description="Validate AgentDefinition against AgentKit Spec before deployment.",
+        description="Validate AgentDefinition against AgentPave Spec before deployment.",
         required_args=[],
         optional_flags=["--config", "--strict (treat warnings as errors)"],
-        example="agentkit validate --strict",
+        example="agentpave validate --strict",
         exit_codes={0: "valid", 1: "errors found", 2: "warnings found (with --strict)"}
     ),
     CLICommandSpec(
@@ -325,7 +325,7 @@ CLI_COMMANDS = [
         description="Run evaluation suite against the agent.",
         required_args=[],
         optional_flags=["--dataset", "--threshold (default: 0.9)", "--mock-tools"],
-        example="agentkit eval --threshold 0.85",
+        example="agentpave eval --threshold 0.85",
         exit_codes={0: "all pass", 1: "below threshold", 2: "eval error"}
     ),
     CLICommandSpec(
@@ -333,7 +333,7 @@ CLI_COMMANDS = [
         description="View execution trace in terminal UI.",
         required_args=[],
         optional_flags=["--last", "--task-id", "--format (terminal|json)"],
-        example="agentkit trace --last",
+        example="agentpave trace --last",
         exit_codes={0: "success", 1: "trace not found"}
     ),
 ]
@@ -347,7 +347,7 @@ from abc import ABC, abstractmethod
 
 class LocalRunner(ABC):
     """
-    Runs an AgentKit agent locally with full production-equivalent behaviour.
+    Runs an AgentPave agent locally with full production-equivalent behaviour.
     Uses the same lifecycle, checkpointing, observability, and security as production.
     The ONLY difference from production: mock tools are available.
     """
@@ -356,7 +356,7 @@ class LocalRunner(ABC):
     def start(self, config: LocalRunConfig) -> None:
         """
         Start the agent. Blocks until the agent is REGISTERED and ready to receive tasks.
-        Raises AgentKit.InvalidAgentDefinitionError if agentkit.yaml is invalid.
+        Raises AgentPave.InvalidAgentDefinitionError if agentpave.yaml is invalid.
         """
         ...
 
@@ -425,7 +425,7 @@ class TraceVisualiser(ABC):
 
 ### 8.3 Validation
 
-**THE SYSTEM SHALL** validate AgentDefinition against agentkit-schema.json in `agentkit validate`.
+**THE SYSTEM SHALL** validate AgentDefinition against agentpave-schema.json in `agentpave validate`.
 
 **THE SYSTEM SHALL** report all ERROR and WARNING issues with field name, message, and fix suggestion.
 
@@ -435,13 +435,13 @@ class TraceVisualiser(ABC):
 
 **THE SYSTEM SHALL** use identical lifecycle management, checkpointing, observability, and security as the production runtime.
 
-**THE SYSTEM SHALL** store checkpoints in `.agentkit/checkpoints/` by default.
+**THE SYSTEM SHALL** store checkpoints in `.agentpave/checkpoints/` by default.
 
-**THE SYSTEM SHALL** write traces to `.agentkit/traces/` by default.
+**THE SYSTEM SHALL** write traces to `.agentpave/traces/` by default.
 
 ### 8.5 AGENTS.md
 
-**THE SYSTEM SHALL** generate an `AGENTS.md` file in every project created by `agentkit init`.
+**THE SYSTEM SHALL** generate an `AGENTS.md` file in every project created by `agentpave init`.
 
 **THE SYSTEM SHALL** include in `AGENTS.md`: project structure, key files, run commands, and spec version reference.
 
@@ -450,14 +450,14 @@ class TraceVisualiser(ABC):
 ## 9. Three-Tier Boundary System
 
 ### ALWAYS
-- Generate AGENTS.md in every project scaffolded by agentkit init
+- Generate AGENTS.md in every project scaffolded by agentpave init
 - Use production-equivalent behaviour in local runner
 - Report human-readable errors (never raw stack traces) from CLI
 - Exit with documented exit codes
-- Validate AgentDefinition against spec in agentkit validate
+- Validate AgentDefinition against spec in agentpave validate
 
 ### ASK FIRST
-- Overwriting an existing project directory with agentkit init
+- Overwriting an existing project directory with agentpave init
 - Deploying an agent that has validation warnings (not errors)
 
 ### NEVER
@@ -471,11 +471,11 @@ class TraceVisualiser(ABC):
 
 | Scenario | Exit Code | Output |
 |---|---|---|
-| agentkit init — directory exists | 2 | "Directory already exists. Use --force to overwrite." |
-| agentkit validate — errors found | 1 | Formatted list of errors with fix suggestions |
-| agentkit run — invalid YAML | 2 | "AgentDefinition is invalid: <error list>" |
-| agentkit invoke — agent not running | 2 | "No agent running. Start with: agentkit run" |
-| agentkit eval — below threshold | 1 | "Evaluation failed: pass_rate=X.XX < threshold=0.90" |
+| agentpave init — directory exists | 2 | "Directory already exists. Use --force to overwrite." |
+| agentpave validate — errors found | 1 | Formatted list of errors with fix suggestions |
+| agentpave run — invalid YAML | 2 | "AgentDefinition is invalid: <error list>" |
+| agentpave invoke — agent not running | 2 | "No agent running. Start with: agentpave run" |
+| agentpave eval — below threshold | 1 | "Evaluation failed: pass_rate=X.XX < threshold=0.90" |
 
 ---
 
@@ -486,14 +486,14 @@ Criteria ID:  D10-001
 Stability:    Alpha
 Given:        Clean Python environment with pip available
 When:         Developer runs:
-              pip install agentkit-cli
-              agentkit init my-agent --template basic
-              cd my-agent && agentkit run --mock-tools &
-              agentkit invoke "Hello, what can you do?"
-              agentkit trace --last
+              pip install agentpave-cli
+              agentpave init my-agent --template basic
+              cd my-agent && agentpave run --mock-tools &
+              agentpave invoke "Hello, what can you do?"
+              agentpave trace --last
 Then:         All 5 commands succeed within 5 minutes total
-              agentkit invoke returns a non-empty AgentResult
-              agentkit trace renders a readable trace to terminal
+              agentpave invoke returns a non-empty AgentResult
+              agentpave trace renders a readable trace to terminal
 Pass:         All commands exit 0, total time < 5 minutes, trace visible
 Fail:         Any command fails, or total time > 5 minutes
 Error raised: None
@@ -503,7 +503,7 @@ Error raised: None
 Criteria ID:  D10-002
 Stability:    Alpha
 Given:        AgentDefinition with version="not-semver" (invalid)
-When:         agentkit validate is run
+When:         agentpave validate is run
 Then:         Exit code 1, error reported:
               field: "version"
               message: describes the SemVer violation
@@ -517,12 +517,12 @@ Error raised: None (SystemExit with code 1)
 Criteria ID:  D10-003
 Stability:    Alpha
 Given:        Local runner started with --mock-tools
-When:         agentkit invoke "Search for something" is called
+When:         agentpave invoke "Search for something" is called
 Then:         MockToolServer handles the tool call (no real API call)
               AgentResult returned with non-empty output
-              Trace stored in .agentkit/traces/
+              Trace stored in .agentpave/traces/
 Pass:         Mock tool used (no real API call), AgentResult returned,
-              trace file exists in .agentkit/traces/
+              trace file exists in .agentpave/traces/
 Fail:         Real API called, or AgentResult empty, or no trace stored
 Error raised: None
 
@@ -530,13 +530,13 @@ Error raised: None
 
 Criteria ID:  D10-004
 Stability:    Alpha
-Given:        agentkit init my-agent --template basic is run
+Given:        agentpave init my-agent --template basic is run
 When:         Project directory is inspected
 Then:         AGENTS.md exists with project structure, run commands, and spec version
-              agentkit.yaml exists with a valid AgentDefinition skeleton
+              agentpave.yaml exists with a valid AgentDefinition skeleton
               tests/ directory exists with at least one fixture
 Pass:         All required files present, AGENTS.md contains spec version reference,
-              agentkit validate returns exit 0 for generated skeleton
+              agentpave validate returns exit 0 for generated skeleton
 Fail:         Any file missing, or generated skeleton fails validation
 Error raised: None
 ```
@@ -550,9 +550,9 @@ Error raised: None
 - [ ] `LocalRunner` abstract + concrete implemented
 - [ ] Local runner uses production-equivalent behaviour
 - [ ] `TraceVisualiser` terminal UI implemented
-- [ ] `agentkit validate` validates against agentkit-schema.json
+- [ ] `agentpave validate` validates against agentpave-schema.json
 - [ ] Built-in templates: basic, rag-agent, router, multi-agent
-- [ ] `AGENTS.md` generated in every `agentkit init` project
+- [ ] `AGENTS.md` generated in every `agentpave init` project
 - [ ] Hello world flow completes in < 5 minutes (measured)
 - [ ] Zero external dependencies for local dev with --mock-tools
 - [ ] All 4 acceptance criteria pass: D10-001 through D10-004
@@ -563,15 +563,15 @@ Error raised: None
 
 ```
 Task D10-T1: Implement CLI framework (Click or Typer based)
-Task D10-T2: Implement agentkit init with template system
-Task D10-T3: Implement agentkit validate (schema + spec validation)
+Task D10-T2: Implement agentpave init with template system
+Task D10-T3: Implement agentpave validate (schema + spec validation)
 Task D10-T4: Implement LocalRunner (wraps chosen runtime with production behaviour)
-Task D10-T5: Implement agentkit run / invoke / stop
+Task D10-T5: Implement agentpave run / invoke / stop
 Task D10-T6: Implement TraceVisualiser (terminal UI, Rich library)
-Task D10-T7: Implement agentkit trace command
-Task D10-T8: Implement agentkit debug (verbose trace mode)
-Task D10-T9: Implement agentkit eval (wraps D9 EvaluationRunner)
-Task D10-T10: Implement agentkit deploy (runtime-specific, pluggable)
+Task D10-T7: Implement agentpave trace command
+Task D10-T8: Implement agentpave debug (verbose trace mode)
+Task D10-T9: Implement agentpave eval (wraps D9 EvaluationRunner)
+Task D10-T10: Implement agentpave deploy (runtime-specific, pluggable)
 Task D10-T11: Add shell completion (bash/zsh/fish)
 Task D10-T12: Create built-in templates (basic, rag-agent, router, multi-agent)
 Task D10-T13: AGENTS.md template generation
@@ -593,18 +593,18 @@ If the simplest possible agent requires a Redis instance, a vector DB, and an LL
 A Python traceback is not a user-facing error message. Every CLI error must be human-readable with a clear fix suggestion. Stack traces go to a log file, not stdout.
 
 **Anti-Pattern 4 — No AGENTS.md**
-AI coding agents (Claude Code, GitHub Copilot) need project context to be useful. Without AGENTS.md, every coding session starts without context. This is a missed productivity opportunity for the exact audience AgentKit targets.
+AI coding agents (Claude Code, GitHub Copilot) need project context to be useful. Without AGENTS.md, every coding session starts without context. This is a missed productivity opportunity for the exact audience AgentPave targets.
 
 ---
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph
+### 15.1 AgentPave-LangGraph
 - CLI framework: `typer` (pip: `typer[all]`) + `rich` for terminal UI
 - TraceVisualiser: `rich` `Tree` and `Panel` components
-- LocalRunner: wraps LangGraph's local execution with AgentKit lifecycle
+- LocalRunner: wraps LangGraph's local execution with AgentPave lifecycle
 
-### 15.2 AgentKit-MAF
+### 15.2 AgentPave-MAF
 - CLI: same Python CLI (language-agnostic command interface)
 - LocalRunner: wraps MAF's local execution mode
 
@@ -614,9 +614,9 @@ AI coding agents (Claude Code, GitHub Copilot) need project context to be useful
 
 | # | Question | Blocks Stable? |
 |---|---|---|
-| OQ-1 | Should agentkit deploy support multiple cloud targets (LangSmith, Azure, AWS)? | No — pluggable deployer interface |
+| OQ-1 | Should agentpave deploy support multiple cloud targets (LangSmith, Azure, AWS)? | No — pluggable deployer interface |
 | OQ-2 | Should there be a TUI (terminal UI) dashboard for long-running agents? | No — nice to have |
-| OQ-3 | Should agentkit init support interactive prompts (wizard mode)? | No — flags are sufficient |
+| OQ-3 | Should agentpave init support interactive prompts (wizard mode)? | No — flags are sufficient |
 
 ---
 
@@ -628,4 +628,4 @@ AI coding agents (Claude Code, GitHub Copilot) need project context to be useful
 
 ---
 
-*AgentKit Dimension 10 — Developer Experience — v1.1*
+*AgentPave Dimension 10 — Developer Experience — v1.1*

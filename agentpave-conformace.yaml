@@ -1,9 +1,9 @@
-# AgentKit Conformance Declaration Template
+# AgentPave Conformance Declaration Template
 # Copy this file to the root of your implementation repository.
 # Fill in all fields before claiming conformance.
 
-agentkit_spec_version: "1.1.1"
-implementation_name: ""               # e.g. "AgentKit-LangGraph"
+agentpave_spec_version: "1.1.1"
+implementation_name: ""               # e.g. "AgentPave-LangGraph"
 implementation_version: ""            # SemVer e.g. "0.1.0"
 conformance_level: ""                 # "MVP" or "Full"
 

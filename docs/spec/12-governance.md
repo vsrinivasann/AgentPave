@@ -1,10 +1,10 @@
-# AgentKit Dimension 12 — Governance
+# AgentPave Dimension 12 — Governance
 
 **Spec version:** 1.1  
 **Stability:** Alpha  
 **Depends on:** D1–D7 (MVP + Security)  
 **Required by:** Nothing in Release 3  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 **Target Release:** Release 3  
 
 ---
@@ -35,7 +35,7 @@
 
 ### 1.1 Purpose
 
-Gartner predicts 40%+ of agentic AI projects will be cancelled by end of 2027 due to governance and ROI failures. D12 exists to prevent AgentKit from being one of them.
+Gartner predicts 40%+ of agentic AI projects will be cancelled by end of 2027 due to governance and ROI failures. D12 exists to prevent AgentPave from being one of them.
 
 Governance is the operating system that decides which agents are approved, which data they can touch, which models they can call, where the workload runs, and how every action is logged so the organisation can answer regulator and auditor questions on demand.
 
@@ -76,10 +76,10 @@ EU AI Act high-risk obligations — Articles 8–17, 26, 27, and 73 — activate
 
 | Decision | Rationale |
 |---|---|
-| **Risk classification is mandatory** | EU AI Act uses a risk-based approach. Every AgentKit agent must declare its risk tier. Unclassified agents cannot be deployed. |
+| **Risk classification is mandatory** | EU AI Act uses a risk-based approach. Every AgentPave agent must declare its risk tier. Unclassified agents cannot be deployed. |
 | **Approval workflow is pre-deployment, not post** | Retrofitting governance costs 4–5x more. Pre-deployment approval gates prevent costly remediation. |
 | **Compliance adapters are pluggable** | No organisation faces a single regulatory framework. Adapters allow mixing EU AI Act + GDPR + HIPAA without writing bespoke code. |
-| **Human oversight is Article 14 compliant** | EU AI Act Article 14 mandates human oversight for high-risk AI systems. AgentKit provides the interface; organisations configure the threshold. |
+| **Human oversight is Article 14 compliant** | EU AI Act Article 14 mandates human oversight for high-risk AI systems. AgentPave provides the interface; organisations configure the threshold. |
 | **Audit evidence is machine-readable** | Human-readable compliance documents satisfy auditors; machine-readable evidence enables automated compliance reporting and continuous monitoring. |
 
 ---
@@ -90,7 +90,7 @@ EU AI Act high-risk obligations — Articles 8–17, 26, 27, and 73 — activate
 |---|---|
 | **EU AI Act Risk Tier** | Classification of an AI system under EU AI Act: UNACCEPTABLE (prohibited), HIGH_RISK (Articles 8–17 apply), LIMITED_RISK (transparency obligations), MINIMAL_RISK (no specific obligations). |
 | **Agent Approval Workflow** | The formal process for reviewing and approving an agent definition before deployment: DRAFT → UNDER_REVIEW → APPROVED → DEPLOYED or REJECTED. |
-| **Compliance Adapter** | A module that maps AgentKit governance data to the evidence format required by a specific regulation (EU AI Act, SOC2, HIPAA, GDPR, ISO 42001). |
+| **Compliance Adapter** | A module that maps AgentPave governance data to the evidence format required by a specific regulation (EU AI Act, SOC2, HIPAA, GDPR, ISO 42001). |
 | **Human Oversight Interface** | A structured request for human review of a high-risk agent action before it executes. Required for HIGH_RISK agents under EU AI Act Article 14. |
 | **Governance Audit Evidence** | Machine-readable records demonstrating compliance: agent risk classification, approval history, oversight invocations, incident reports. |
 | **Data Residency** | The requirement that data be processed and stored within a specific geographic region. |
@@ -301,7 +301,7 @@ from abc import ABC, abstractmethod
 
 class GovernanceManager(ABC):
     """
-    Manages the full governance lifecycle for AgentKit agents.
+    Manages the full governance lifecycle for AgentPave agents.
     Attaches at extension point: governance.policy
     """
 
@@ -312,7 +312,7 @@ class GovernanceManager(ABC):
         Required before approval workflow can start for HIGH_RISK agents.
 
         Raises:
-            AgentKit.GovernanceError: agent is UNACCEPTABLE risk tier (prohibited).
+            AgentPave.GovernanceError: agent is UNACCEPTABLE risk tier (prohibited).
         """
         ...
 
@@ -386,13 +386,13 @@ class GovernanceManager(ABC):
 
 **THE SYSTEM SHALL** block deployment of any agent where `can_deploy(agent_id)` returns False.
 
-**WHEN** `eu_ai_act_tier == UNACCEPTABLE` **THE SYSTEM SHALL** raise `AgentKit.GovernanceError` and prevent any lifecycle transition beyond DECLARED.
+**WHEN** `eu_ai_act_tier == UNACCEPTABLE` **THE SYSTEM SHALL** raise `AgentPave.GovernanceError` and prevent any lifecycle transition beyond DECLARED.
 
-**WHEN** `eu_ai_act_tier == HIGH_RISK` and no approved risk classification exists **THE SYSTEM SHALL** block deployment with `AgentKit.GovernanceError`.
+**WHEN** `eu_ai_act_tier == HIGH_RISK` and no approved risk classification exists **THE SYSTEM SHALL** block deployment with `AgentPave.GovernanceError`.
 
 ### 8.2 Human Oversight (Article 14)
 
-**WHEN** an agent with `eu_ai_act_tier == HIGH_RISK` is about to execute an action flagged for human oversight **THE SYSTEM SHALL** invoke the HITL extension (AgentKit-HITL) before proceeding.
+**WHEN** an agent with `eu_ai_act_tier == HIGH_RISK` is about to execute an action flagged for human oversight **THE SYSTEM SHALL** invoke the HITL extension (AgentPave-HITL) before proceeding.
 
 **THE SYSTEM SHALL** record every human oversight invocation as a `ComplianceEvidenceRecord` with `framework=EU_AI_ACT` and `control_id='Article14'`.
 
@@ -436,9 +436,9 @@ class GovernanceManager(ABC):
 
 | Scenario | Error Type | Recoverable | Required context |
 |---|---|---|---|
-| UNACCEPTABLE risk agent attempts any operation | `AgentKit.GovernanceError` | No | `agent_id, eu_ai_act_tier` |
-| HIGH_RISK agent attempts deployment without approval | `AgentKit.GovernanceError` | No — get approval first | `agent_id, approval_status` |
-| Approval attempted without risk classification | `AgentKit.GovernanceError` | No — classify first | `agent_id` |
+| UNACCEPTABLE risk agent attempts any operation | `AgentPave.GovernanceError` | No | `agent_id, eu_ai_act_tier` |
+| HIGH_RISK agent attempts deployment without approval | `AgentPave.GovernanceError` | No — get approval first | `agent_id, approval_status` |
+| Approval attempted without risk classification | `AgentPave.GovernanceError` | No — classify first | `agent_id` |
 
 ---
 
@@ -449,11 +449,11 @@ Criteria ID:  D12-001
 Stability:    Alpha
 Given:        Agent classified as UNACCEPTABLE risk tier
 When:         Any lifecycle transition beyond DECLARED is attempted
-Then:         AgentKit.GovernanceError raised
+Then:         AgentPave.GovernanceError raised
               Agent remains in DECLARED state
 Pass:         GovernanceError raised, lifecycle_state == DECLARED
 Fail:         Agent transitions despite UNACCEPTABLE classification
-Error raised: AgentKit.GovernanceError
+Error raised: AgentPave.GovernanceError
 
 ---
 
@@ -465,7 +465,7 @@ Then:         Returns False
               Deployment blocked
 Pass:         can_deploy returns False, deployment raises GovernanceError
 Fail:         can_deploy returns True without classification
-Error raised: AgentKit.GovernanceError (if deployment attempted)
+Error raised: AgentPave.GovernanceError (if deployment attempted)
 
 ---
 
@@ -541,7 +541,7 @@ Risk classifications expire. An agent's risk profile changes when its data input
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph and AgentKit-MAF
+### 15.1 AgentPave-LangGraph and AgentPave-MAF
 - Compliance evidence storage: PostgreSQL with append-only audit table
 - EU AI Act evidence generation: map to Annex IV documentation requirements
 - Incident reporting integration: webhook to notification system
@@ -549,7 +549,7 @@ Risk classifications expire. An agent's risk profile changes when its data input
 
 ### 15.2 Five-Framework Crosswalk
 
-| AgentKit Control | EU AI Act | SOC2 | HIPAA | GDPR | ISO 42001 |
+| AgentPave Control | EU AI Act | SOC2 | HIPAA | GDPR | ISO 42001 |
 |---|---|---|---|---|---|
 | Risk classification | Art. 9 | CC3.2 | — | Art. 35 DPIA | 6.1.2 |
 | Approval workflow | Art. 26 | CC8.1 | — | — | 8.4 |
@@ -563,7 +563,7 @@ Risk classifications expire. An agent's risk profile changes when its data input
 
 | # | Question | Blocks Stable? |
 |---|---|---|
-| OQ-1 | Should AgentKit provide pre-built Annex IV technical documentation templates? | No — community extension |
+| OQ-1 | Should AgentPave provide pre-built Annex IV technical documentation templates? | No — community extension |
 | OQ-2 | Should risk classification be automated using the agent's capability declarations? | Yes — reduces classification burden |
 | OQ-3 | Should DORA (Digital Operational Resilience Act) be a supported framework? | No — add in v2 |
 
@@ -577,4 +577,4 @@ Risk classifications expire. An agent's risk profile changes when its data input
 
 ---
 
-*AgentKit Dimension 12 — Governance — v1.1*
+*AgentPave Dimension 12 — Governance — v1.1*

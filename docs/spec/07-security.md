@@ -1,10 +1,10 @@
-# AgentKit Dimension 7 — Security
+# AgentPave Dimension 7 — Security
 
 **Spec version:** 1.1  
 **Stability:** Alpha  
 **Depends on:** D1 (Identity), D2 (Lifecycle), D3 (Communication), D5 (Observability)  
 **Required by:** D12 (Governance)  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 **Target Release:** Release 2  
 
 ---
@@ -35,7 +35,7 @@
 
 ### 1.1 Purpose
 
-Security is not a layer added on top of AgentKit — it is a property woven through every dimension. D1 (Identity) established cryptographic agent identity. D7 extends that foundation into a full Zero Trust security model: every agent action is authenticated, every tool call is authorised against policy, every decision is audited.
+Security is not a layer added on top of AgentPave — it is a property woven through every dimension. D1 (Identity) established cryptographic agent identity. D7 extends that foundation into a full Zero Trust security model: every agent action is authenticated, every tool call is authorised against policy, every decision is audited.
 
 In 2026, the standard is Zero-Trust Agent Identity — every agent call must be authenticated, authorised, and audited independently.
 
@@ -98,9 +98,9 @@ Without D7:
 | Term | Definition |
 |---|---|
 | **Zero Trust** | Security model where no agent, user, or system is trusted by default. Every request is independently authenticated, authorised, and audited. |
-| **Policy-as-Code** | Security rules expressed as declarative, machine-readable, version-controlled code evaluated at runtime. AgentKit supports OPA Rego and Cedar policy languages. |
-| **Policy Decision Point (PDP)** | The component that evaluates a policy against an input and returns ALLOW or DENY. AgentKit embeds a PDP that evaluates on every tool call. |
-| **Policy Enforcement Point (PEP)** | The component that intercepts an action and submits it to the PDP before allowing execution. AgentKit's ToolCaller is the PEP. |
+| **Policy-as-Code** | Security rules expressed as declarative, machine-readable, version-controlled code evaluated at runtime. AgentPave supports OPA Rego and Cedar policy languages. |
+| **Policy Decision Point (PDP)** | The component that evaluates a policy against an input and returns ALLOW or DENY. AgentPave embeds a PDP that evaluates on every tool call. |
+| **Policy Enforcement Point (PEP)** | The component that intercepts an action and submits it to the PDP before allowing execution. AgentPave's ToolCaller is the PEP. |
 | **Confused Deputy** | A security vulnerability where an agent is manipulated — via prompt injection or malicious tool output — into exercising its privileges on behalf of an unauthorised party. |
 | **Privilege Ceiling** | The maximum privilege an agent may exercise — capped at the privilege of the entity that invoked it. Never higher. |
 | **Prompt Injection** | An attack where malicious content in tool outputs or user inputs attempts to override the agent's instructions and cause it to take unauthorised actions. |
@@ -124,7 +124,7 @@ from enum import Enum
 class PolicyLanguage(str, Enum):
     OPA_REGO = "opa_rego"
     CEDAR    = "cedar"
-    YAML     = "yaml"      # AgentKit simplified policy format
+    YAML     = "yaml"      # AgentPave simplified policy format
 
 
 class PolicyEffect(str, Enum):
@@ -147,7 +147,7 @@ class PolicyDocument(BaseModel):
             "The policy content in the declared language. "
             "For OPA Rego: valid Rego policy text. "
             "For Cedar: valid Cedar policy text. "
-            "For YAML: AgentKit simplified policy format."
+            "For YAML: AgentPave simplified policy format."
         )
     )
     default_effect: PolicyEffect = Field(
@@ -313,11 +313,11 @@ class PromptInjectionScanResult(BaseModel):
 ### 6.1 OPA Rego Policy
 
 ```rego
-# agentkit_policy.rego
-# AgentKit standard policy format
+# agentpave_policy.rego
+# AgentPave standard policy format
 # Denies all tool calls by default; allows only declared permitted actions.
 
-package agentkit
+package agentpave
 
 import future.keywords.if
 import future.keywords.in
@@ -340,11 +340,11 @@ deny if {
 ### 6.2 Cedar Policy
 
 ```cedar
-// AgentKit Cedar policy example
+// AgentPave Cedar policy example
 permit(
-    principal == AgentKit::Agent::"customer-support-router",
-    action in [AgentKit::Action::"tool:web_search:invoke"],
-    resource == AgentKit::Tool::"web_search"
+    principal == AgentPave::Agent::"customer-support-router",
+    action in [AgentPave::Action::"tool:web_search:invoke"],
+    resource == AgentPave::Tool::"web_search"
 ) when {
     principal.domain == "customer-support" &&
     context.invoking_user_privilege_level != "read-only"
@@ -358,7 +358,7 @@ permit(
 input_data = PolicyEvaluationInput(
     request_id=str(uuid4()),
     agent_id="<agent_uuid>",
-    agent_spiffe_id="spiffe://agentkit.local/agentkit/<agent_id>/<instance_id>",
+    agent_spiffe_id="spiffe://agentpave.local/agentpave/<agent_id>/<instance_id>",
     invoking_user="user@example.com",
     invoking_user_privilege_level="standard",
     action="tool:web_search:invoke",
@@ -369,7 +369,7 @@ input_data = PolicyEvaluationInput(
 
 decision = policy_decision_point.evaluate(input_data)
 # decision.effect == PolicyEffect.ALLOW → tool call proceeds
-# decision.effect == PolicyEffect.DENY → AgentKit.PolicyDeniedError raised
+# decision.effect == PolicyEffect.DENY → AgentPave.PolicyDeniedError raised
 ```
 
 ---
@@ -385,7 +385,7 @@ from abc import ABC, abstractmethod
 class PolicyDecisionPoint(ABC):
     """
     Evaluates policy against an input and returns ALLOW or DENY.
-    Embedded in AgentKit core — not a remote call.
+    Embedded in AgentPave core — not a remote call.
     MUST evaluate in < 1ms p99 (sub-millisecond, fail-closed).
 
     Contract:
@@ -411,7 +411,7 @@ class PolicyDecisionPoint(ABC):
         Called at agent registration time.
 
         Raises:
-            AgentKit.PolicyLoadError: policy content is invalid for the declared language.
+            AgentPave.PolicyLoadError: policy content is invalid for the declared language.
         """
         ...
 
@@ -467,7 +467,7 @@ class AuditTrail(ABC):
         MUST maintain hash chain integrity.
 
         Raises:
-            AgentKit.AuditTrailError: record could not be appended.
+            AgentPave.AuditTrailError: record could not be appended.
                 If this raises, the associated tool call MUST be blocked.
         """
         ...
@@ -501,7 +501,7 @@ class AuditTrail(ABC):
 
 **THE SYSTEM SHALL** evaluate policy via the PDP before every tool call execution.
 
-**WHEN** the PDP returns `PolicyEffect.DENY` **THE SYSTEM SHALL** raise `AgentKit.PolicyDeniedError` and block the tool call.
+**WHEN** the PDP returns `PolicyEffect.DENY` **THE SYSTEM SHALL** raise `AgentPave.PolicyDeniedError` and block the tool call.
 
 **THE SYSTEM SHALL** write an `AuditDecisionRecord` for every policy evaluation — both ALLOW and DENY.
 
@@ -511,7 +511,7 @@ class AuditTrail(ABC):
 
 **THE SYSTEM SHALL** cap the agent's effective privilege at the privilege level of the invoking user.
 
-**WHEN** an agent attempts an action that requires privilege exceeding `invoking_user_privilege_level` **THE SYSTEM SHALL** raise `AgentKit.PrivilegeEscalationError`.
+**WHEN** an agent attempts an action that requires privilege exceeding `invoking_user_privilege_level` **THE SYSTEM SHALL** raise `AgentPave.PrivilegeEscalationError`.
 
 **THE SYSTEM SHALL** include `invoking_user` and `invoking_user_privilege_level` in every `PolicyEvaluationInput`.
 
@@ -521,7 +521,7 @@ class AuditTrail(ABC):
 
 **THE SYSTEM SHALL** scan every user input via `PromptInjectionScanner.scan()` before it enters the agent loop.
 
-**WHEN** `scan_result.should_block == True` **THE SYSTEM SHALL** block the content from reaching the LLM, raise `AgentKit.PromptInjectionDetectedError`, and log the detection.
+**WHEN** `scan_result.should_block == True` **THE SYSTEM SHALL** block the content from reaching the LLM, raise `AgentPave.PromptInjectionDetectedError`, and log the detection.
 
 **WHEN** `scan_result.risk_level` is LOW or MEDIUM **THE SYSTEM SHALL** use `scan_result.sanitised_content` in place of the original content.
 
@@ -529,7 +529,7 @@ class AuditTrail(ABC):
 
 **THE SYSTEM SHALL** write every `AuditDecisionRecord` synchronously and durably before the associated action proceeds.
 
-**WHEN** `AuditTrail.append()` raises `AgentKit.AuditTrailError` **THE SYSTEM SHALL** block the associated tool call — no action proceeds without an audit record.
+**WHEN** `AuditTrail.append()` raises `AgentPave.AuditTrailError` **THE SYSTEM SHALL** block the associated tool call — no action proceeds without an audit record.
 
 **THE SYSTEM SHALL** include hash-chaining: each record includes the SHA-256 hash of the previous record.
 
@@ -572,11 +572,11 @@ class AuditTrail(ABC):
 
 | Scenario | Error Type | Recoverable | Required context |
 |---|---|---|---|
-| PDP returns DENY | `AgentKit.PolicyDeniedError` | No | `agent_id, action, rule_matched, reason` |
-| Agent exceeds invoking user privilege | `AgentKit.PrivilegeEscalationError` | No | `agent_id, requested_level, ceiling_level` |
-| Prompt injection detected (HIGH/CRITICAL) | `AgentKit.PromptInjectionDetectedError` | No | `source, risk_level, detected_patterns` |
-| Audit trail write fails | `AgentKit.AuditTrailError` | No — block the action | `record_id, cause` |
-| Policy document invalid | `AgentKit.PolicyLoadError` | No — fix the policy | `policy_id, validation_errors` |
+| PDP returns DENY | `AgentPave.PolicyDeniedError` | No | `agent_id, action, rule_matched, reason` |
+| Agent exceeds invoking user privilege | `AgentPave.PrivilegeEscalationError` | No | `agent_id, requested_level, ceiling_level` |
+| Prompt injection detected (HIGH/CRITICAL) | `AgentPave.PromptInjectionDetectedError` | No | `source, risk_level, detected_patterns` |
+| Audit trail write fails | `AgentPave.AuditTrailError` | No — block the action | `record_id, cause` |
+| Policy document invalid | `AgentPave.PolicyLoadError` | No — fix the policy | `policy_id, validation_errors` |
 
 ---
 
@@ -603,11 +603,11 @@ Given:        A running agent with a policy that DENIES "tool:database_write:inv
 When:         tool_caller.call(request) for database_write is attempted
 Then:         PDP returns DENY, tool call is blocked
               AuditDecisionRecord written with effect=DENY
-              AgentKit.PolicyDeniedError raised
+              AgentPave.PolicyDeniedError raised
 Pass:         PolicyDeniedError raised, tool not invoked,
               AuditDecisionRecord written with effect=DENY
 Fail:         Tool invoked despite DENY decision
-Error raised: AgentKit.PolicyDeniedError
+Error raised: AgentPave.PolicyDeniedError
 
 ---
 
@@ -616,12 +616,12 @@ Stability:    Alpha
 Given:        Agent invoked by user with privilege_level="read-only"
               Agent attempts action requiring privilege_level="admin"
 When:         PDP evaluates the action
-Then:         AgentKit.PrivilegeEscalationError raised
+Then:         AgentPave.PrivilegeEscalationError raised
               Action is blocked
 Pass:         PrivilegeEscalationError raised,
               context["ceiling_level"]=="read-only", action not executed
 Fail:         Action proceeds despite privilege ceiling violation
-Error raised: AgentKit.PrivilegeEscalationError
+Error raised: AgentPave.PrivilegeEscalationError
 
 ---
 
@@ -636,7 +636,7 @@ Then:         PromptInjectionScanResult.risk_level >= HIGH
 Pass:         risk_level in (HIGH, CRITICAL), should_block==True,
               LLM call log shows content was blocked
 Fail:         Injected content reaches LLM, or risk_level is LOW/SAFE
-Error raised: AgentKit.PromptInjectionDetectedError
+Error raised: AgentPave.PromptInjectionDetectedError
 
 ---
 
@@ -660,11 +660,11 @@ Given:        AuditTrail backend is unavailable (connection refused)
 When:         A tool call is attempted (PDP returns ALLOW)
 Then:         AuditTrail.append() raises AuditTrailError
               Tool call is BLOCKED despite PDP ALLOW
-              AgentKit.AuditTrailError propagated
+              AgentPave.AuditTrailError propagated
 Pass:         Tool not invoked despite ALLOW decision,
               AuditTrailError raised
 Fail:         Tool invoked without audit record
-Error raised: AgentKit.AuditTrailError
+Error raised: AgentPave.AuditTrailError
 
 ---
 
@@ -673,12 +673,12 @@ Stability:    Alpha
 Given:        An AgentDefinition dict containing a field with value
               matching API key pattern: "sk-abc123def456..."
 When:         AgentRegistry.register(definition) is called
-Then:         AgentKit.InvalidAgentDefinitionError raised
+Then:         AgentPave.InvalidAgentDefinitionError raised
               Agent is NOT registered
 Pass:         InvalidAgentDefinitionError raised,
               validation_errors mentions secret pattern detected
 Fail:         Agent registered with embedded secret
-Error raised: AgentKit.InvalidAgentDefinitionError
+Error raised: AgentPave.InvalidAgentDefinitionError
 ```
 
 ---
@@ -752,13 +752,13 @@ Tool outputs are an attack surface. An MCP server that has been compromised can 
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph
+### 15.1 AgentPave-LangGraph
 - OPA embedded: use `opa-python` (pip: `opa-python`) or subprocess OPA binary
 - Cedar: use `cedarpy` (pip: `cedarpy`)
 - Prompt injection: `rebuff` library or custom pattern matcher + embedding similarity
 - Audit trail: PostgreSQL with `INSERT` only permissions (no UPDATE/DELETE on audit table)
 
-### 15.2 AgentKit-MAF
+### 15.2 AgentPave-MAF
 - OPA: available as Azure Container Apps sidecar
 - Cedar: AWS Cedar for Python (`cedar-policy` pip package)
 - Audit trail: Azure Cosmos DB with append-only access policy + change feed
@@ -775,7 +775,7 @@ Tool outputs are an attack surface. An MCP server that has been compromised can 
 | AA6: Sensitive Information Disclosure | Secret reference model |
 | AA7: Insecure Agent Communication | mTLS for A2A (D3) |
 | AA8: Inadequate Sandboxing | Execution rings (reference implementation) |
-| AA9: Overreliance on Agent Decisions | HITL extension (AgentKit-HITL) |
+| AA9: Overreliance on Agent Decisions | HITL extension (AgentPave-HITL) |
 | AA10: Lack of Auditability | Hash-chained AuditTrail |
 
 ---
@@ -784,7 +784,7 @@ Tool outputs are an attack surface. An MCP server that has been compromised can 
 
 | # | Question | Blocks Stable? |
 |---|---|---|
-| OQ-1 | Should AgentKit support dynamic trust scoring (DynaTrust graph) per agent edge? | No — add in v2 |
+| OQ-1 | Should AgentPave support dynamic trust scoring (DynaTrust graph) per agent edge? | No — add in v2 |
 | OQ-2 | Should policy documents be signed and verified before loading? | Yes — required for tamper-evident policy management |
 | OQ-3 | Should the injection scanner use an LLM-based detector or pattern-only? | No — both modes should be supported |
 | OQ-4 | Should privilege levels be an enum or a free-form hierarchy? | Yes — standardise the privilege level taxonomy |
@@ -799,4 +799,4 @@ Tool outputs are an attack surface. An MCP server that has been compromised can 
 
 ---
 
-*AgentKit Dimension 7 — Security — v1.1*
+*AgentPave Dimension 7 — Security — v1.1*

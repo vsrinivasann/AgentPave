@@ -1,10 +1,10 @@
-# AgentKit Dimension 6 — Reliability
+# AgentPave Dimension 6 — Reliability
 
 **Spec version:** 1.1  
 **Stability:** Beta  
 **Depends on:** D1 (Identity), D2 (Lifecycle), D3 (Communication), D4 (Memory), D5 (Observability)  
 **Required by:** Nothing in MVP — this is the final MVP dimension  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 
 ---
 
@@ -36,7 +36,7 @@
 
 Reliability is what transforms an agent from a demo into a production system. It is the final MVP dimension because it depends on all others — it requires Identity (to associate checkpoints with agents), Lifecycle (to know when to checkpoint), Communication (tool call boundaries trigger checkpoints), Memory (checkpoints include memory state), and Observability (drift events are observed).
 
-Reliability in AgentKit has four pillars:
+Reliability in AgentPave has four pillars:
 
 1. **Durable Execution** — agents survive any failure and resume from their exact stopping point
 2. **Deterministic Task Routing** — deterministic tasks never touch the LLM
@@ -68,8 +68,8 @@ Separate from failure recovery, agents that route deterministic tasks through th
 - Checkpoint encryption at rest — that is D6 (Security, post-MVP)
 - Checkpoint replication across regions — that is infrastructure concern
 - Agent load testing and capacity planning — that is operations concern
-- Evaluation framework for quality scoring — that is AgentKit-Eval extension
-- Memory consolidation between sessions — that is AgentKit-Memory extension
+- Evaluation framework for quality scoring — that is AgentPave-Eval extension
+- Memory consolidation between sessions — that is AgentPave-Memory extension
 - Token budget enforcement — that is D8 (Economics, post-MVP)
 
 ---
@@ -395,7 +395,7 @@ class CheckpointStore(ABC):
         MUST complete before returning (synchronous, durable write).
 
         Raises:
-            AgentKit.CheckpointError: checkpoint could not be saved.
+            AgentPave.CheckpointError: checkpoint could not be saved.
                 If this raises, the calling code MUST halt the agent task —
                 continuing without a checkpoint violates the durability invariant.
         """
@@ -407,7 +407,7 @@ class CheckpointStore(ABC):
         Load the most recent checkpoint for a task (highest sequence_number).
 
         Raises:
-            AgentKit.CheckpointError: no checkpoint found for this task,
+            AgentPave.CheckpointError: no checkpoint found for this task,
                 or checkpoint data is corrupted.
         """
         ...
@@ -418,7 +418,7 @@ class CheckpointStore(ABC):
         Load a specific checkpoint by ID.
 
         Raises:
-            AgentKit.CheckpointError: checkpoint not found or corrupted.
+            AgentPave.CheckpointError: checkpoint not found or corrupted.
         """
         ...
 
@@ -456,7 +456,7 @@ class TaskRouter(ABC):
             TaskRouteResult with route_type and optional handler reference.
 
         Raises:
-            AgentKit.DeterministicTaskLLMRouteError: if a task classified as
+            AgentPave.DeterministicTaskLLMRouteError: if a task classified as
                 DETERMINISTIC is attempted to be sent to LLM. (Called as a
                 safeguard — should not happen in normal flow.)
         """
@@ -478,7 +478,7 @@ class TaskRouter(ABC):
         3. Verify NO LLM call was made during handler execution.
 
         Raises:
-            AgentKit.DeterministicTaskLLMRouteError: if handler made an LLM call.
+            AgentPave.DeterministicTaskLLMRouteError: if handler made an LLM call.
             Any exception from the handler function (propagated as-is).
         """
         ...
@@ -521,7 +521,7 @@ class ReliabilityEnforcer(ABC):
             float: Quality score. 0.0 = lowest quality, 1.0 = highest.
 
         Raises:
-            AgentKit.ReliabilityContractViolationError: if score < quality_threshold
+            AgentPave.ReliabilityContractViolationError: if score < quality_threshold
                 from the agent's ReliabilityContract.
                 context = {"score": float, "threshold": float, "agent_id": str}
         """
@@ -594,7 +594,7 @@ class DriftDetector(ABC):
 
 **THE SYSTEM SHALL** persist checkpoints synchronously (durable write) before returning control to the agent. An unsaved checkpoint is not a checkpoint.
 
-**WHEN** `CheckpointStore.save()` raises `AgentKit.CheckpointError` **THE SYSTEM SHALL** halt the agent task, transition to PAUSED state, and raise the error. Continuing without a saved checkpoint violates the durability invariant.
+**WHEN** `CheckpointStore.save()` raises `AgentPave.CheckpointError` **THE SYSTEM SHALL** halt the agent task, transition to PAUSED state, and raise the error. Continuing without a saved checkpoint violates the durability invariant.
 
 ### 8.2 Resume from Checkpoint
 
@@ -614,7 +614,7 @@ class DriftDetector(ABC):
 
 **WHEN** a task matches a `DeterministicTaskDefinition.input_pattern` **THE SYSTEM SHALL** route it to the registered `handler_function` — NOT to the LLM.
 
-**WHEN** a deterministic task is routed to the LLM **THE SYSTEM SHALL** raise `AgentKit.DeterministicTaskLLMRouteError` immediately.
+**WHEN** a deterministic task is routed to the LLM **THE SYSTEM SHALL** raise `AgentPave.DeterministicTaskLLMRouteError` immediately.
 
 **THE SYSTEM SHALL** verify that `execute_deterministic()` makes no LLM calls during handler execution. Any LLM call from within a deterministic handler raises `DeterministicTaskLLMRouteError`.
 
@@ -622,7 +622,7 @@ class DriftDetector(ABC):
 
 **THE SYSTEM SHALL** evaluate every LLM output using `ReliabilityEnforcer.evaluate()`.
 
-**WHEN** the quality score is below `reliability_contract.quality_threshold` **THE SYSTEM SHALL** raise `AgentKit.ReliabilityContractViolationError` with `context = {"score": float, "threshold": float}`.
+**WHEN** the quality score is below `reliability_contract.quality_threshold` **THE SYSTEM SHALL** raise `AgentPave.ReliabilityContractViolationError` with `context = {"score": float, "threshold": float}`.
 
 **WHEN** `reliability_contract.grounding_required = True` **THE SYSTEM SHALL** verify that the LLM output is grounded (references retrieved context) before passing it to the quality evaluator.
 
@@ -669,10 +669,10 @@ class DriftDetector(ABC):
 
 | Scenario | Error Type | Recoverable | Required context |
 |---|---|---|---|
-| Checkpoint cannot be saved | `AgentKit.CheckpointError` | No — halt task, transition to PAUSED | `checkpoint_id, cause` |
-| Checkpoint not found on resume | `AgentKit.CheckpointError` | No — task must restart | `agent_id, task_id` |
-| Deterministic task routed to LLM | `AgentKit.DeterministicTaskLLMRouteError` | No | `task_input, task_id` |
-| LLM output below quality threshold | `AgentKit.ReliabilityContractViolationError` | No | `score, threshold, agent_id` |
+| Checkpoint cannot be saved | `AgentPave.CheckpointError` | No — halt task, transition to PAUSED | `checkpoint_id, cause` |
+| Checkpoint not found on resume | `AgentPave.CheckpointError` | No — task must restart | `agent_id, task_id` |
+| Deterministic task routed to LLM | `AgentPave.DeterministicTaskLLMRouteError` | No | `task_input, task_id` |
+| LLM output below quality threshold | `AgentPave.ReliabilityContractViolationError` | No | `score, threshold, agent_id` |
 
 ---
 
@@ -690,7 +690,7 @@ Then:         A CheckpointData is persisted with:
 Pass:         CheckpointStore has a record with the correct pending_tool_call,
               sequence_number is N, persisted before MCP call is made
 Fail:         Checkpoint not created before tool call, or pending_tool_call not set
-Error raised: None (if checkpoint save fails: AgentKit.CheckpointError)
+Error raised: None (if checkpoint save fails: AgentPave.CheckpointError)
 
 ---
 
@@ -730,11 +730,11 @@ Stability:    Beta
 Given:        Agent with ReliabilityContract.quality_threshold=0.8
               LLM output receives quality score 0.65 from the evaluator
 When:         ReliabilityEnforcer.evaluate(agent_id, llm_output, context) is called
-Then:         AgentKit.ReliabilityContractViolationError raised
+Then:         AgentPave.ReliabilityContractViolationError raised
 Pass:         ReliabilityContractViolationError raised,
               context["score"]==0.65, context["threshold"]==0.8
 Fail:         Output accepted despite low score, or different error
-Error raised: AgentKit.ReliabilityContractViolationError
+Error raised: AgentPave.ReliabilityContractViolationError
 
 ---
 
@@ -760,10 +760,10 @@ Stability:    Beta
 Given:        A running agent with DeterministicTaskDefinition registered
 When:         A deterministic task is classified and execute_deterministic() is called,
               but the handler function internally makes an LLM API call
-Then:         AgentKit.DeterministicTaskLLMRouteError raised
+Then:         AgentPave.DeterministicTaskLLMRouteError raised
 Pass:         DeterministicTaskLLMRouteError raised when handler makes LLM call
 Fail:         LLM call proceeds, or different error, or no error
-Error raised: AgentKit.DeterministicTaskLLMRouteError
+Error raised: AgentPave.DeterministicTaskLLMRouteError
 
 ---
 
@@ -771,13 +771,13 @@ Criteria ID:  D6-007
 Stability:    Beta
 Given:        CheckpointStore configured with a failing backend (raises on save())
 When:         A tool call boundary is reached and checkpoint save is attempted
-Then:         AgentKit.CheckpointError raised
+Then:         AgentPave.CheckpointError raised
               Agent task is halted — execution does NOT continue
               Agent transitions to PAUSED state
 Pass:         CheckpointError raised, execution halted,
               agent.lifecycle_state == PAUSED after the error
 Fail:         Agent continues execution despite failed checkpoint, or no error
-Error raised: AgentKit.CheckpointError
+Error raised: AgentPave.CheckpointError
 ```
 
 ---
@@ -854,15 +854,15 @@ When `reliability_contract.grounding_required = True`, checking quality score al
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph
+### 15.1 AgentPave-LangGraph
 - Checkpointing: LangGraph's `SqliteSaver` (dev) / `PostgresSaver` (prod) as CheckpointStore backend
 - LangGraph's native `interrupt()` and checkpoint-and-resume maps directly to D6 durable execution
 - TaskRouter: use LangGraph's conditional edges for routing decisions
 - DriftDetector: use numpy for cosine similarity comparisons in development
 
-### 15.2 AgentKit-MAF
+### 15.2 AgentPave-MAF
 - Checkpointing: Azure Cosmos DB with TTL disabled (checkpoints should not expire automatically)
-- MAF's actor model handles resume natively — wire AgentKit CheckpointData into MAF's state persistence
+- MAF's actor model handles resume natively — wire AgentPave CheckpointData into MAF's state persistence
 - TaskRouter: MAF's function invocation framework maps to handler_function routing
 
 ### 15.3 Checkpoint Storage Requirements
@@ -896,4 +896,4 @@ When `reliability_contract.grounding_required = True`, checking quality score al
 
 ---
 
-*AgentKit Dimension 6 — Reliability — v1.1*
+*AgentPave Dimension 6 — Reliability — v1.1*

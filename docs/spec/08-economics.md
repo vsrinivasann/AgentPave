@@ -1,10 +1,10 @@
-# AgentKit Dimension 8 — Economics
+# AgentPave Dimension 8 — Economics
 
 **Spec version:** 1.1  
 **Stability:** Alpha  
 **Depends on:** D1 (Identity), D2 (Lifecycle), D3 (Communication), D5 (Observability)  
 **Required by:** Nothing in Release 2  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 **Target Release:** Release 2  
 
 ---
@@ -78,7 +78,7 @@ Unoptimised production agents can cost $10–100+ per session due to long contex
 | **Hierarchical budgets** | Org-level budgets prevent any single agent or team from monopolising resources. Team budgets enable cost attribution. Agent budgets provide per-agent guardrails. |
 | **Semantic caching uses vector similarity** | Exact-match caching misses semantically equivalent queries. Semantic caching (embedding + cosine similarity) achieves up to 73% cost reduction in high-repetition workloads. |
 | **Model routing is complexity-based** | Simple tasks (classification, formatting) routed to cheap models; complex reasoning to frontier models. This achieves 97.7% accuracy at 61% cost for multi-agent hierarchies. |
-| **Prompt caching is prefix-based** | Provider-side prompt caching works by matching the prefix of the prompt. AgentKit structures prompts with stable prefixes (system prompt first) to maximise cache hits. |
+| **Prompt caching is prefix-based** | Provider-side prompt caching works by matching the prefix of the prompt. AgentPave structures prompts with stable prefixes (system prompt first) to maximise cache hits. |
 
 ---
 
@@ -92,7 +92,7 @@ Unoptimised production agents can cost $10–100+ per session due to long contex
 | **Hard Limit** | The 100% budget threshold that triggers immediate task suspension and raises BudgetExceededError. |
 | **Model Tier** | Classification of LLM models by capability and cost: ECONOMY (simple tasks, cheapest), STANDARD (general reasoning), FRONTIER (complex reasoning, most expensive). |
 | **Model Router** | The component that classifies task complexity and selects the appropriate model tier. |
-| **Prompt Caching** | Provider-side caching of stable prompt prefixes. AgentKit structures prompts to maximise cache hits by placing stable content (system prompt, instructions) before variable content. |
+| **Prompt Caching** | Provider-side caching of stable prompt prefixes. AgentPave structures prompts to maximise cache hits by placing stable content (system prompt, instructions) before variable content. |
 | **Semantic Cache** | A local cache of LLM responses keyed by embedding vector similarity. Returns cached responses for semantically equivalent queries without an LLM API call. |
 | **Cache Hit Rate** | The percentage of LLM calls served from the semantic cache. Target: > 30% in production. |
 | **Cost Attribution** | The process of tracking and reporting token spend per agent, per task, and per team. |
@@ -189,7 +189,7 @@ class ModelRoutingConfig(BaseModel):
 class PromptCacheConfig(BaseModel):
     """
     Configuration for provider-side prompt caching.
-    AgentKit structures prompts to maximise stable prefix length.
+    AgentPave structures prompts to maximise stable prefix length.
     """
     enabled: bool = Field(default=True)
     stable_prefix_fields: list[str] = Field(
@@ -340,7 +340,7 @@ class BudgetEnforcer(ABC):
         Check if estimated_tokens can be consumed without exceeding any budget level.
 
         Raises:
-            AgentKit.BudgetExceededError: if any budget level would be exceeded.
+            AgentPave.BudgetExceededError: if any budget level would be exceeded.
                 context = {"scope": str, "entity_id": str, "available": int, "requested": int}
         Emits:
             Soft alert event via AgentObserver when 50% or 80% threshold crossed.
@@ -449,7 +449,7 @@ class SemanticCache(ABC):
 
 **THE SYSTEM SHALL** call `BudgetEnforcer.check_budget()` before every LLM call.
 
-**WHEN** any budget level (task, day, lifetime) would be exceeded **THE SYSTEM SHALL** raise `AgentKit.BudgetExceededError` and block the LLM call.
+**WHEN** any budget level (task, day, lifetime) would be exceeded **THE SYSTEM SHALL** raise `AgentPave.BudgetExceededError` and block the LLM call.
 
 **THE SYSTEM SHALL** emit a soft alert observability event when consumption crosses 50% of any budget level.
 
@@ -510,7 +510,7 @@ class SemanticCache(ABC):
 
 | Scenario | Error Type | Recoverable | Required context |
 |---|---|---|---|
-| Any budget level exceeded | `AgentKit.BudgetExceededError` | No — task must halt | `scope, entity_id, available, requested` |
+| Any budget level exceeded | `AgentPave.BudgetExceededError` | No — task must halt | `scope, entity_id, available, requested` |
 | Budget at 50% | Observability event (not error) | N/A | `scope, entity_id, pct_used` |
 | Budget at 80% | Observability event (not error) | N/A | `scope, entity_id, pct_used` |
 | Complexity classification fails | No error — default to FRONTIER | N/A | Logged as warning |
@@ -525,11 +525,11 @@ Stability:    Alpha
 Given:        Agent with per_task token budget of 1000
               Current task has consumed 950 tokens
 When:         LLM call estimated to consume 100 more tokens is attempted
-Then:         AgentKit.BudgetExceededError raised
+Then:         AgentPave.BudgetExceededError raised
               LLM call is blocked
 Pass:         BudgetExceededError raised, context["available"]==50, context["requested"]==100
 Fail:         LLM call proceeds despite budget exceeded
-Error raised: AgentKit.BudgetExceededError
+Error raised: AgentPave.BudgetExceededError
 
 ---
 
@@ -651,13 +651,13 @@ Without CostRecord tracking per agent and task, cost optimisation is guesswork. 
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph
+### 15.1 AgentPave-LangGraph
 - Budget enforcement: custom middleware wrapping LangGraph's LLM node
 - Model routing: LangChain's model switching via configurable LLM wrapper
 - Semantic cache: Redis with `redis-py` + `numpy` cosine similarity
 - Cost tracking: LangSmith's built-in cost tracking as observability backend
 
-### 15.2 AgentKit-MAF
+### 15.2 AgentPave-MAF
 - Budget enforcement: MAF middleware hook before every model call
 - Semantic cache: Azure Cache for Redis
 - Model routing: Azure AI model catalog with tier-based routing rules
@@ -682,4 +682,4 @@ Without CostRecord tracking per agent and task, cost optimisation is guesswork. 
 
 ---
 
-*AgentKit Dimension 8 — Economics — v1.1*
+*AgentPave Dimension 8 — Economics — v1.1*

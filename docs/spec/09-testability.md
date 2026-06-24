@@ -1,10 +1,10 @@
-# AgentKit Dimension 9 — Testability
+# AgentPave Dimension 9 — Testability
 
 **Spec version:** 1.1  
 **Stability:** Alpha  
 **Depends on:** D1–D6 (all MVP dimensions)  
 **Required by:** Nothing in Release 2  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 **Target Release:** Release 2  
 
 ---
@@ -38,7 +38,7 @@
 AI agents fail differently from traditional software: they produce well-formed but wrong outputs, make semantically invalid decisions, and degrade silently over time. Traditional unit testing with deterministic assertions cannot catch these failures. D9 defines a testability model purpose-built for AI agents.
 
 D9 delivers four capabilities:
-1. **Unit testable components** — every AgentKit component is independently testable
+1. **Unit testable components** — every AgentPave component is independently testable
 2. **Mock tool interface** — full offline development without real tool calls
 3. **Evaluation framework** — semantic quality evaluation beyond pass/fail
 4. **CI/CD integration** — evaluation gates that block merges on quality regressions
@@ -243,8 +243,8 @@ class MockToolResponse(BaseModel):
 mock_responses = [
     MockToolResponse(
         tool_name="web_search",
-        arguments_match={"query": "AgentKit framework"},
-        response={"results": ["AgentKit is a framework for building AI agents"]},
+        arguments_match={"query": "AgentPave framework"},
+        response={"results": ["AgentPave is a framework for building AI agents"]},
         latency_ms=50
     ),
     MockToolResponse(
@@ -266,8 +266,8 @@ fixture = EvaluationFixture(
     fixture_id=str(uuid4()),
     dataset_id="<dataset_uuid>",
     agent_id="<agent_uuid>",
-    input="Find information about AgentKit framework",
-    expected_output="AgentKit is a framework for building AI agents",
+    input="Find information about AgentPave framework",
+    expected_output="AgentPave is a framework for building AI agents",
     metric_type=EvaluationMetricType.SEMANTIC_SIMILARITY,
     pass_threshold=0.85,
     tags=["search", "happy-path"],
@@ -424,7 +424,7 @@ class ProductionFeedbackLoop(ABC):
 
 **THE SYSTEM SHALL** return `MockToolResponse.response` when a tool call matches the configured `tool_name` and `arguments_match`.
 
-**WHEN** `should_fail=True` **THE SYSTEM SHALL** raise `AgentKit.ToolUnavailableError` to simulate tool failure.
+**WHEN** `should_fail=True` **THE SYSTEM SHALL** raise `AgentPave.ToolUnavailableError` to simulate tool failure.
 
 **THE SYSTEM SHALL** add every tool call to the call log, regardless of match result.
 
@@ -478,9 +478,9 @@ class ProductionFeedbackLoop(ABC):
 
 | Scenario | Error Type | Recoverable | Required context |
 |---|---|---|---|
-| Mock tool not configured for call | `AgentKit.ToolNotFoundError` | No — add mock config | `tool_name` |
+| Mock tool not configured for call | `AgentPave.ToolNotFoundError` | No — add mock config | `tool_name` |
 | Evaluation metric raises | Caught — score returns 0.0 | Yes | Logged as warning |
-| Production trace not found | `AgentKit.AgentNotFoundError` | No — check trace_id | `trace_id` |
+| Production trace not found | `AgentPave.AgentNotFoundError` | No — check trace_id | `trace_id` |
 
 ---
 
@@ -503,17 +503,17 @@ Criteria ID:  D9-002
 Stability:    Alpha
 Given:        MockToolServer configured with should_fail=True for database_lookup
 When:         Agent calls database_lookup
-Then:         AgentKit.ToolUnavailableError raised by mock server
+Then:         AgentPave.ToolUnavailableError raised by mock server
 Pass:         ToolUnavailableError raised, agent handles failure per Integration Contract
 Fail:         Mock server returns success despite should_fail=True
-Error raised: AgentKit.ToolUnavailableError
+Error raised: AgentPave.ToolUnavailableError
 
 ---
 
 Criteria ID:  D9-003
 Stability:    Alpha
-Given:        EvaluationFixture with expected_output="AgentKit is a framework"
-              Agent produces actual_output="AgentKit is a tool for building agents"
+Given:        EvaluationFixture with expected_output="AgentPave is a framework"
+              Agent produces actual_output="AgentPave is a tool for building agents"
               Metric: SemanticSimilarityMetric, pass_threshold=0.80
 When:         EvaluationRunner.run_single(fixture) is called
 Then:         Score computed between 0.80 and 1.0 (semantically similar)
@@ -600,14 +600,14 @@ Every production failure that is fixed without adding a regression case will rec
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph
+### 15.1 AgentPave-LangGraph
 - MockToolServer: FastAPI app implementing MCP tools/list and tools/call endpoints
 - SemanticSimilarityMetric: `sentence-transformers` for embedding generation
 - EvaluationRunner: integrates with LangSmith's evaluation API as optional backend
 
-### 15.2 AgentKit-MAF
+### 15.2 AgentPave-MAF
 - MockToolServer: same FastAPI implementation (language-agnostic MCP protocol)
-- CI/CD: GitHub Actions workflow template included in AgentKit-MAF distribution
+- CI/CD: GitHub Actions workflow template included in AgentPave-MAF distribution
 
 ---
 
@@ -629,4 +629,4 @@ Every production failure that is fixed without adding a regression case will rec
 
 ---
 
-*AgentKit Dimension 9 — Testability — v1.1*
+*AgentPave Dimension 9 — Testability — v1.1*

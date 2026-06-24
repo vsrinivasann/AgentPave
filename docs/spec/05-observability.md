@@ -1,10 +1,10 @@
-# AgentKit Dimension 5 — Observability
+# AgentPave Dimension 5 — Observability
 
 **Spec version:** 1.1  
 **Stability:** Beta  
 **Depends on:** D1 (Identity), D2 (Lifecycle)  
 **Required by:** D6 (Reliability — drift detection emits observability events)  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 
 ---
 
@@ -38,7 +38,7 @@ Agents fail in ways that look like success — well-formed but wrong outputs, re
 
 In 2026, observability is built on OpenTelemetry's GenAI semantic conventions — a vendor-neutral standard that every major agent observability platform (Langfuse, LangSmith, Braintrust, Arize, Laminar) supports as an exporter target.
 
-AgentKit makes observability a core primitive — not an optional extension. The observability backend is pluggable; the instrumentation is mandatory.
+AgentPave makes observability a core primitive — not an optional extension. The observability backend is pluggable; the instrumentation is mandatory.
 
 ### 1.2 Production Consequence of Getting This Wrong
 
@@ -66,8 +66,8 @@ Without observability:
 
 ### 2.2 Out of Scope
 
-- Observability backend implementations (LangSmith, Langfuse, Braintrust etc.) — those are the AgentKit-Observe extension
-- Online evaluation and scoring — that is AgentKit-Eval extension
+- Observability backend implementations (LangSmith, Langfuse, Braintrust etc.) — those are the AgentPave-Observe extension
+- Online evaluation and scoring — that is AgentPave-Eval extension
 - Alerting and dashboards — that is the observability backend
 - LLM call tracing beyond what OpenTelemetry GenAI conventions define — that is a future spec version
 - Session replay — that is an advanced observability backend feature
@@ -78,12 +78,12 @@ Without observability:
 
 | Decision | Rationale |
 |---|---|
-| **OpenTelemetry is the standard** | OTel is the CNCF standard for distributed tracing. Every major agent observability platform supports it as an exporter. Building on OTel means AgentKit traces integrate with any existing APM infrastructure. |
+| **OpenTelemetry is the standard** | OTel is the CNCF standard for distributed tracing. Every major agent observability platform supports it as an exporter. Building on OTel means AgentPave traces integrate with any existing APM infrastructure. |
 | **Structured logs use the same schema as OTel spans** | Consistency between logs and spans means the same trace_id links both — enabling correlation without custom tooling. |
 | **Null/stdout backend is the default** | An observability backend being unavailable MUST NOT prevent agent execution. The default backend writes to stdout and never fails. Production teams replace this with their chosen platform. |
 | **SDK-based instrumentation, not proxy-based** | SDK instrumentation means traces are captured within the agent's own infrastructure. No proxy = no credential exposure, no single point of failure between the agent and its observability backend. |
 | **trace_id is the primary correlation key** | All logs and spans for a single task share one trace_id. This enables cross-service debugging without custom correlation fields. |
-| **AgentResult is the standard output schema** | All tool calls, LLM calls, and agent actions return an AgentResult. Standardising this schema means observability backends can parse any AgentKit event without agent-specific configuration. |
+| **AgentResult is the standard output schema** | All tool calls, LLM calls, and agent actions return an AgentResult. Standardising this schema means observability backends can parse any AgentPave event without agent-specific configuration. |
 
 ---
 
@@ -142,7 +142,7 @@ class AgentResult(BaseModel):
     error: Optional[str] = Field(
         None,
         description=(
-            "AgentKit error type and message when status is error. "
+            "AgentPave error type and message when status is error. "
             "Format: '<ErrorClassName>: <message>'. "
             "None when status is success."
         )
@@ -239,15 +239,15 @@ class StructuredLogEntry(BaseModel):
 class OTelSpanAttributes(BaseModel):
     """
     OpenTelemetry span attributes following OTel GenAI semantic conventions.
-    These attributes are set on every OTel span emitted by AgentKit.
+    These attributes are set on every OTel span emitted by AgentPave.
     """
 
-    # --- AgentKit-specific attributes ---
-    agentkit_agent_id: str         # gen_ai.agent.id
-    agentkit_agent_name: str       # gen_ai.agent.name
-    agentkit_agent_version: str    # gen_ai.agent.version
-    agentkit_task_id: str          # gen_ai.request.id (repurposed)
-    agentkit_action_type: str      # gen_ai.operation.name
+    # --- AgentPave-specific attributes ---
+    agentpave_agent_id: str         # gen_ai.agent.id
+    agentpave_agent_name: str       # gen_ai.agent.name
+    agentpave_agent_version: str    # gen_ai.agent.version
+    agentpave_task_id: str          # gen_ai.request.id (repurposed)
+    agentpave_action_type: str      # gen_ai.operation.name
 
     # --- OTel GenAI conventions (tool calls) ---
     gen_ai_tool_name: Optional[str] = None      # gen_ai.tool.name
@@ -374,7 +374,7 @@ class ObservabilityBackend(ABC):
 ```python
 class AgentObserver(ABC):
     """
-    The core observability interface injected into every AgentKit component.
+    The core observability interface injected into every AgentPave component.
     Produces ObservabilityEvents and routes them to the configured backend.
 
     Usage: every component that performs observable actions (ToolCaller,
@@ -461,7 +461,7 @@ class AgentObserver(ABC):
         action_name: str
     ) -> None:
         """
-        Record an error event. Called whenever an AgentKitError is raised.
+        Record an error event. Called whenever an AgentPaveError is raised.
         MUST NOT raise.
         """
         ...
@@ -515,7 +515,7 @@ class AgentObserver(ABC):
 
 ### 8.4 Trace ID Propagation
 
-**THE SYSTEM SHALL** propagate `trace_id` to all downstream calls from a tool invocation — including MCP tool calls (via `X-AgentKit-Trace-Id` header, D3) and A2A messages.
+**THE SYSTEM SHALL** propagate `trace_id` to all downstream calls from a tool invocation — including MCP tool calls (via `X-AgentPave-Trace-Id` header, D3) and A2A messages.
 
 **THE SYSTEM SHALL** create a new `trace_id` for every new task execution. Different task executions MUST have different trace IDs even for the same agent.
 
@@ -554,8 +554,8 @@ class AgentObserver(ABC):
 
 | Scenario | Error Type | Recoverable | Required context |
 |---|---|---|---|
-| Observability backend unavailable | `AgentKit.ObservabilityBackendError` | Yes — fall back to stdout | `backend_type` |
-| Backend unavailability during flush | `AgentKit.ObservabilityBackendError` | Yes — retry once, then warn | `backend_type, pending_events` |
+| Observability backend unavailable | `AgentPave.ObservabilityBackendError` | Yes — fall back to stdout | `backend_type` |
+| Backend unavailability during flush | `AgentPave.ObservabilityBackendError` | Yes — retry once, then warn | `backend_type, pending_events` |
 
 Note: `ObservabilityBackendError` is logged to stderr but NEVER propagated to the agent caller. Observability failures are always handled internally by the observer.
 
@@ -587,7 +587,7 @@ Given:        A running agent that invokes a tool
 When:         The tool call completes
 Then:         An OTel span is emitted with:
               - gen_ai_tool_name == tool name
-              - agentkit_agent_id == agent.agent_id
+              - agentpave_agent_id == agent.agent_id
               - trace_id matches the task's trace_id
               - duration set correctly
               - parent_span_id set (not None) for non-root spans
@@ -724,16 +724,16 @@ An observability backend that writes synchronously and blocks on network I/O add
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph
+### 15.1 AgentPave-LangGraph
 - Use `opentelemetry-sdk` + `opentelemetry-exporter-otlp` for OTel span emission
 - LangSmith integration: `LangSmithSpanExporter` as the observability backend
 - Langfuse integration: `LangfuseSpanExporter` as the observability backend
 - AgentObserver should be injected as a dependency into ToolCaller and LifecycleManager
 
-### 15.2 AgentKit-MAF
+### 15.2 AgentPave-MAF
 - MAF has native OpenTelemetry integration — wire AgentObserver to MAF's built-in telemetry
 - Azure Monitor / Application Insights as the default observability backend for MAF
-- `X-AgentKit-Trace-Id` header propagation integrates with Azure distributed tracing
+- `X-AgentPave-Trace-Id` header propagation integrates with Azure distributed tracing
 
 ### 15.3 OTel Backend Compatibility
 
@@ -752,7 +752,7 @@ An observability backend that writes synchronously and blocks on network I/O add
 
 | # | Question | Blocks Stable? |
 |---|---|---|
-| OQ-1 | Should AgentKit define a standard sampling rate for high-volume agents? | No |
+| OQ-1 | Should AgentPave define a standard sampling rate for high-volume agents? | No |
 | OQ-2 | Should drift_event spans include the full embedding vector? (privacy concern) | Yes — clarify before Stable |
 | OQ-3 | Should LLM call spans include input/output content, or only token counts? | Yes — data residency implications |
 
@@ -766,4 +766,4 @@ An observability backend that writes synchronously and blocks on network I/O add
 
 ---
 
-*AgentKit Dimension 5 — Observability — v1.1*
+*AgentPave Dimension 5 — Observability — v1.1*

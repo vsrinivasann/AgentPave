@@ -1,10 +1,10 @@
-# AgentKit Dimension 3 — Communication
+# AgentPave Dimension 3 — Communication
 
 **Spec version:** 1.1  
 **Stability:** Beta  
 **Depends on:** D1 (Identity), D2 (Lifecycle)  
 **Required by:** D4, D6  
-**Owner:** AgentKit Core  
+**Owner:** AgentPave Core  
 
 ---
 
@@ -34,7 +34,7 @@
 
 ### 1.1 Purpose
 
-Communication is how an agent acts on the world. Without a standardised tool invocation model, every tool integration is a custom, untested, one-off adapter. The MCP standard crossed 97 million monthly SDK downloads in 2026 and became the universal tool integration protocol for AI agents — AgentKit adopts it as the mandatory protocol for all tool communication.
+Communication is how an agent acts on the world. Without a standardised tool invocation model, every tool integration is a custom, untested, one-off adapter. The MCP standard crossed 97 million monthly SDK downloads in 2026 and became the universal tool integration protocol for AI agents — AgentPave adopts it as the mandatory protocol for all tool communication.
 
 This dimension governs three communication channels:
 1. **Agent ↔ Tool** — via MCP (mandatory, standardised)
@@ -63,11 +63,11 @@ Before MCP, connecting an agent to three external systems meant three custom int
 
 ### 2.2 Out of Scope
 
-- MCP server implementation — AgentKit is an MCP client
+- MCP server implementation — AgentPave is an MCP client
 - A2A server implementation — out of MVP scope
 - Authentication of MCP server connections — that is D6 (Security)
-- Tool caching — that is AgentKit-Cache extension
-- Human approval workflows — that is AgentKit-HITL extension
+- Tool caching — that is AgentPave-Cache extension
+- Human approval workflows — that is AgentPave-HITL extension
 - Cost tracking of tool calls — that is D8 (Economics)
 
 ---
@@ -88,17 +88,17 @@ Before MCP, connecting an agent to three external systems meant three custom int
 
 | Term | Definition |
 |---|---|
-| **MCP** | Model Context Protocol. JSON-RPC-based protocol for agent-to-tool communication. AgentKit uses MCP as client. All tool calls use `tools/call`. Tool discovery uses `tools/list`. |
+| **MCP** | Model Context Protocol. JSON-RPC-based protocol for agent-to-tool communication. AgentPave uses MCP as client. All tool calls use `tools/call`. Tool discovery uses `tools/list`. |
 | **MCP Tool** | A named, schema-described function exposed by an MCP server that an agent can invoke. |
 | **Integration Contract** | A per-tool declaration specifying: accessed systems, unavailability behaviour, retry policy, rate limit policy, and timeout policy. Mandatory for every tool. |
 | **Circuit Breaker** | A resilience pattern that tracks tool failure rates and temporarily stops calling a failing tool (OPEN state) to prevent cascading failures. |
 | **Circuit Breaker State** | One of three states: CLOSED (normal operation), OPEN (failing — calls blocked), HALF_OPEN (recovery probe). |
 | **Retry Policy** | The declared strategy for retrying failed tool calls: max_attempts, backoff strategy (exponential), and jitter. |
 | **Rate Limit Policy** | The declared strategy for handling rate limit (429) responses: per-second and per-minute limits, backoff on limit hit. |
-| **Tool Result** | The structured return value from a tool call. AgentKit wraps every tool result as an `AgentResult`. |
+| **Tool Result** | The structured return value from a tool call. AgentPave wraps every tool result as an `AgentResult`. |
 | **A2A** | Agent-to-Agent protocol. Used for cross-runtime agent communication. Schemas are SemVer versioned. |
 | **Human Interaction Request** | A structured message from an agent to a human, requiring a response before the agent continues. Used for approval, clarification, or information gathering. |
-| **Timeout Policy** | The declared maximum time to wait for a tool response before raising `AgentKit.ToolTimeoutError`. |
+| **Timeout Policy** | The declared maximum time to wait for a tool response before raising `AgentPave.ToolTimeoutError`. |
 
 ---
 
@@ -422,7 +422,7 @@ request = ToolCallRequest(
     agent_id="f47ac10b-58cc-4372-a567-0e02b2c3d479",
     task_id="b3d4e5f6-...",
     tool_name="web_search",
-    arguments={"query": "AgentKit framework 2026", "num_results": 5},
+    arguments={"query": "AgentPave framework 2026", "num_results": 5},
     trace_id=str(uuid4()),
     issued_at="2026-06-09T12:00:00.000Z",
     runtime_token="<jwt>"
@@ -468,8 +468,8 @@ class ToolRegistry(ABC):
         5. Store contract internally.
 
         Raises:
-            AgentKit.ToolNotFoundError: tool_name not found in MCP server's tools/list.
-            AgentKit.IntegrationContractViolationError: tool version mismatch.
+            AgentPave.ToolNotFoundError: tool_name not found in MCP server's tools/list.
+            AgentPave.IntegrationContractViolationError: tool version mismatch.
         """
         ...
 
@@ -479,7 +479,7 @@ class ToolRegistry(ABC):
         Retrieve the Integration Contract for a registered tool.
 
         Raises:
-            AgentKit.ToolNotFoundError: tool not registered.
+            AgentPave.ToolNotFoundError: tool not registered.
         """
         ...
 
@@ -507,7 +507,7 @@ class ToolCaller(ABC):
         Invoke a tool via MCP, enforcing the tool's Integration Contract.
 
         Execution order:
-        1. Check circuit breaker state. If OPEN: raise AgentKit.CircuitBreakerOpenError.
+        1. Check circuit breaker state. If OPEN: raise AgentPave.CircuitBreakerOpenError.
         2. Validate agent is in RUNNING state (via LifecycleManager).
         3. Validate request.tool_name is registered (via ToolRegistry).
         4. Check rate limit. If exceeded: wait per RateLimitPolicy or raise RateLimitError.
@@ -521,12 +521,12 @@ class ToolCaller(ABC):
               trace_id from request MUST be propagated to the MCP server as a header.
 
         Raises:
-            AgentKit.ToolNotFoundError: tool not registered.
-            AgentKit.ToolUnavailableError: tool unreachable after retry exhaustion.
-            AgentKit.RateLimitError: rate limit exceeded.
-            AgentKit.ToolTimeoutError: tool did not respond within timeout_ms.
-            AgentKit.CircuitBreakerOpenError: circuit is OPEN for this tool.
-            AgentKit.InvalidStateTransitionError: agent not in RUNNING state.
+            AgentPave.ToolNotFoundError: tool not registered.
+            AgentPave.ToolUnavailableError: tool unreachable after retry exhaustion.
+            AgentPave.RateLimitError: rate limit exceeded.
+            AgentPave.ToolTimeoutError: tool did not respond within timeout_ms.
+            AgentPave.CircuitBreakerOpenError: circuit is OPEN for this tool.
+            AgentPave.InvalidStateTransitionError: agent not in RUNNING state.
         """
         ...
 ```
@@ -555,8 +555,8 @@ class AgentCommunicator(ABC):
             payload: Must conform to the schema for schema_version.
 
         Raises:
-            AgentKit.SchemaMismatchError: schema_version incompatible with receiver.
-            AgentKit.AgentNotFoundError: to_agent_id not in registry.
+            AgentPave.SchemaMismatchError: schema_version incompatible with receiver.
+            AgentPave.AgentNotFoundError: to_agent_id not in registry.
         """
         ...
 
@@ -573,7 +573,7 @@ class AgentCommunicator(ABC):
             None: For INFORM type (no response expected).
 
         Raises:
-            AgentKit.HumanInputTimeoutError: if timeout_seconds exceeded.
+            AgentPave.HumanInputTimeoutError: if timeout_seconds exceeded.
         """
         ...
 ```
@@ -588,17 +588,17 @@ class AgentCommunicator(ABC):
 
 **THE SYSTEM SHALL** validate Integration Contracts against the MCP server's `tools/list` at registration time — not at call time.
 
-**WHEN** an agent attempts to invoke a tool without a registered Integration Contract **THE SYSTEM SHALL** raise `AgentKit.ToolNotFoundError`.
+**WHEN** an agent attempts to invoke a tool without a registered Integration Contract **THE SYSTEM SHALL** raise `AgentPave.ToolNotFoundError`.
 
 ### 8.2 Tool Invocation
 
 **THE SYSTEM SHALL** route all tool calls through MCP `tools/call` — direct function calls to tools are prohibited.
 
-**THE SYSTEM SHALL** propagate the `trace_id` from `ToolCallRequest` to the MCP server as a request header (`X-AgentKit-Trace-Id`).
+**THE SYSTEM SHALL** propagate the `trace_id` from `ToolCallRequest` to the MCP server as a request header (`X-AgentPave-Trace-Id`).
 
-**THE SYSTEM SHALL** enforce `timeout_ms` from the Integration Contract — if the tool does not respond within `timeout_ms`, raise `AgentKit.ToolTimeoutError`.
+**THE SYSTEM SHALL** enforce `timeout_ms` from the Integration Contract — if the tool does not respond within `timeout_ms`, raise `AgentPave.ToolTimeoutError`.
 
-**WHILE** an agent is not in RUNNING state **THE SYSTEM SHALL** reject all tool invocations with `AgentKit.InvalidStateTransitionError`.
+**WHILE** an agent is not in RUNNING state **THE SYSTEM SHALL** reject all tool invocations with `AgentPave.InvalidStateTransitionError`.
 
 ### 8.3 Retry Logic
 
@@ -614,7 +614,7 @@ class AgentCommunicator(ABC):
 
 **THE SYSTEM SHALL** maintain a circuit breaker per registered tool.
 
-**WHEN** consecutive failures reach `failure_threshold` **THE SYSTEM SHALL** transition the circuit to OPEN and raise `AgentKit.CircuitBreakerOpenError` with structured metadata: `breaker_name`, `retry_after`, `failure_count`.
+**WHEN** consecutive failures reach `failure_threshold` **THE SYSTEM SHALL** transition the circuit to OPEN and raise `AgentPave.CircuitBreakerOpenError` with structured metadata: `breaker_name`, `retry_after`, `failure_count`.
 
 **WHEN** `recovery_timeout_ms` elapses in OPEN state **THE SYSTEM SHALL** transition to HALF_OPEN and allow `half_open_max_calls` probe calls.
 
@@ -632,7 +632,7 @@ class AgentCommunicator(ABC):
 
 **THE SYSTEM SHALL** require a `schema_version` on all A2A messages.
 
-**WHEN** the receiving agent's declared schema version is incompatible with `schema_version` **THE SYSTEM SHALL** raise `AgentKit.SchemaMismatchError`.
+**WHEN** the receiving agent's declared schema version is incompatible with `schema_version` **THE SYSTEM SHALL** raise `AgentPave.SchemaMismatchError`.
 
 ---
 
@@ -665,15 +665,15 @@ class AgentCommunicator(ABC):
 
 | Scenario | Error Type | Recoverable | Required context |
 |---|---|---|---|
-| Tool not registered | `AgentKit.ToolNotFoundError` | No | `tool_name` |
-| Tool unreachable after retries | `AgentKit.ToolUnavailableError` | Yes (per fallback) | `tool_name, attempts, last_error` |
-| Rate limit exceeded and retries exhausted | `AgentKit.RateLimitError` | Yes (wait) | `tool_name, retry_after_ms` |
-| Tool did not respond in time | `AgentKit.ToolTimeoutError` | Yes (retry) | `tool_name, timeout_ms` |
-| Circuit breaker OPEN | `AgentKit.CircuitBreakerOpenError` | Yes (wait recovery_timeout) | `tool_name, retry_after, failure_count` |
-| Tool response violates schema | `AgentKit.IntegrationContractViolationError` | No | `tool_name, schema_field, received_value` |
-| A2A schema version mismatch | `AgentKit.SchemaMismatchError` | No | `expected_version, received_version` |
-| Human input timeout | `AgentKit.HumanInputTimeoutError` | Yes (agent pauses) | `request_id, timeout_seconds` |
-| Tool call when agent not RUNNING | `AgentKit.InvalidStateTransitionError` | No | `agent_id, current_state` |
+| Tool not registered | `AgentPave.ToolNotFoundError` | No | `tool_name` |
+| Tool unreachable after retries | `AgentPave.ToolUnavailableError` | Yes (per fallback) | `tool_name, attempts, last_error` |
+| Rate limit exceeded and retries exhausted | `AgentPave.RateLimitError` | Yes (wait) | `tool_name, retry_after_ms` |
+| Tool did not respond in time | `AgentPave.ToolTimeoutError` | Yes (retry) | `tool_name, timeout_ms` |
+| Circuit breaker OPEN | `AgentPave.CircuitBreakerOpenError` | Yes (wait recovery_timeout) | `tool_name, retry_after, failure_count` |
+| Tool response violates schema | `AgentPave.IntegrationContractViolationError` | No | `tool_name, schema_field, received_value` |
+| A2A schema version mismatch | `AgentPave.SchemaMismatchError` | No | `expected_version, received_version` |
+| Human input timeout | `AgentPave.HumanInputTimeoutError` | Yes (agent pauses) | `request_id, timeout_seconds` |
+| Tool call when agent not RUNNING | `AgentPave.InvalidStateTransitionError` | No | `agent_id, current_state` |
 
 ---
 
@@ -696,10 +696,10 @@ Criteria ID:  D3-002
 Stability:    Beta
 Given:        A running agent attempting to call an unregistered tool "unknown_tool"
 When:         tool_caller.call(ToolCallRequest(..., tool_name="unknown_tool", ...))
-Then:         AgentKit.ToolNotFoundError is raised
+Then:         AgentPave.ToolNotFoundError is raised
 Pass:         ToolNotFoundError raised, context["tool_name"] == "unknown_tool"
 Fail:         Call succeeds or different error raised
-Error raised: AgentKit.ToolNotFoundError
+Error raised: AgentPave.ToolNotFoundError
 
 ---
 
@@ -710,11 +710,11 @@ Given:        A tool whose MCP server returns errors on every call
               IntegrationContract: fallback_behaviour=RAISE_ERROR
 When:         tool_caller.call(request) is called
 Then:         3 total attempts are made (1 original + 2 retries)
-              AgentKit.ToolUnavailableError raised after all attempts exhausted
+              AgentPave.ToolUnavailableError raised after all attempts exhausted
 Pass:         MCP call log shows exactly 3 attempts,
               ToolUnavailableError raised with context["attempts"]==3
 Fail:         Fewer or more than 3 attempts, or different error, or no error
-Error raised: AgentKit.ToolUnavailableError
+Error raised: AgentPave.ToolUnavailableError
 
 ---
 
@@ -724,11 +724,11 @@ Given:        A tool with circuit breaker: failure_threshold=3
               The tool has already failed 3 consecutive times (circuit is OPEN)
 When:         tool_caller.call(request) is called
 Then:         No MCP call is made (circuit is OPEN — call is blocked)
-              AgentKit.CircuitBreakerOpenError raised immediately
+              AgentPave.CircuitBreakerOpenError raised immediately
 Pass:         Zero MCP calls made, CircuitBreakerOpenError raised,
               context["tool_name"] set, context["retry_after"] is a future timestamp
 Fail:         MCP call attempt made despite OPEN circuit, or different error
-Error raised: AgentKit.CircuitBreakerOpenError
+Error raised: AgentPave.CircuitBreakerOpenError
 
 ---
 
@@ -737,12 +737,12 @@ Stability:    Beta
 Given:        A tool with timeout_ms=5000
               The MCP server takes 6000ms to respond
 When:         tool_caller.call(request) is called
-Then:         AgentKit.ToolTimeoutError raised after 5000ms
+Then:         AgentPave.ToolTimeoutError raised after 5000ms
               No partial result is returned
 Pass:         ToolTimeoutError raised, elapsed time ~5000ms (±100ms),
               context["timeout_ms"] == 5000
 Fail:         Call waits 6000ms, or different error, or partial result returned
-Error raised: AgentKit.ToolTimeoutError
+Error raised: AgentPave.ToolTimeoutError
 
 ---
 
@@ -750,11 +750,11 @@ Criteria ID:  D3-006
 Stability:    Beta
 Given:        A paused agent (lifecycle_state == PAUSED)
 When:         tool_caller.call(request) is called
-Then:         AgentKit.InvalidStateTransitionError raised
+Then:         AgentPave.InvalidStateTransitionError raised
               No MCP call is made
 Pass:         Error raised, zero MCP calls logged
 Fail:         Tool invoked despite agent being PAUSED, or different error
-Error raised: AgentKit.InvalidStateTransitionError
+Error raised: AgentPave.InvalidStateTransitionError
 
 ---
 
@@ -762,11 +762,11 @@ Criteria ID:  D3-007
 Stability:    Beta
 Given:        Two agents: sender declares schema_version="1.0.0", receiver expects "2.0.0"
 When:         agent_communicator.send_to_agent(schema_version="1.0.0", payload={...})
-Then:         AgentKit.SchemaMismatchError raised
+Then:         AgentPave.SchemaMismatchError raised
 Pass:         SchemaMismatchError raised,
               context["expected_version"]=="2.0.0", context["received_version"]=="1.0.0"
 Fail:         Message delivered despite version mismatch, or different error
-Error raised: AgentKit.SchemaMismatchError
+Error raised: AgentPave.SchemaMismatchError
 
 ---
 
@@ -775,12 +775,12 @@ Stability:    Beta
 Given:        A tool that returns a response violating its declared output schema
               (e.g. tool declares output.results as list[str] but returns list[int])
 When:         tool_caller.call(request) returns the invalid response
-Then:         AgentKit.IntegrationContractViolationError raised
+Then:         AgentPave.IntegrationContractViolationError raised
               The invalid response is NOT passed to the agent
 Pass:         IntegrationContractViolationError raised,
               context["tool_name"] set, invalid output not accessible to agent
 Fail:         Invalid output passed to agent, or different error
-Error raised: AgentKit.IntegrationContractViolationError
+Error raised: AgentPave.IntegrationContractViolationError
 ```
 
 ---
@@ -845,12 +845,12 @@ An agent that updates its output format without bumping schema_version silently 
 
 ## 15. Reference Implementation Notes
 
-### 15.1 AgentKit-LangGraph
+### 15.1 AgentPave-LangGraph
 - Use the `mcp` Python package (PyPI: `mcp>=1.0`) for all MCP client operations
 - LangGraph's `ToolNode` should be wrapped to enforce IntegrationContract checks
 - Circuit breaker can use `tenacity` library with custom circuit breaker state machine
 
-### 15.2 AgentKit-MAF
+### 15.2 AgentPave-MAF
 - MAF has native MCP client support — use it directly
 - Rate limiting can leverage Azure API Management policies if tools are Azure-hosted
 - A2A protocol support is native in MAF — use it for agent-to-agent calls
@@ -861,7 +861,7 @@ An agent that updates its output format without bumping schema_version silently 
 
 | # | Question | Blocks Stable? |
 |---|---|---|
-| OQ-1 | Should AgentKit define a standard tool output schema that all tools must conform to? | No (MCP tools define their own schemas) |
+| OQ-1 | Should AgentPave define a standard tool output schema that all tools must conform to? | No (MCP tools define their own schemas) |
 | OQ-2 | Should circuit breaker state be shared across agent instances of the same type? | No — per-agent by default is safer |
 | OQ-3 | Should retry budgets count against the agent's token budget? | Yes — add to D8 (Economics) spec |
 
@@ -875,4 +875,4 @@ An agent that updates its output format without bumping schema_version silently 
 
 ---
 
-*AgentKit Dimension 3 — Communication — v1.1*
+*AgentPave Dimension 3 — Communication — v1.1*
