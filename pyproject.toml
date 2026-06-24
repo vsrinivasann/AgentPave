@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "agentpave"
+version = "0.1.0"
+description = "The runtime-agnostic AI agent specification. Define once. Run anywhere."
+readme = "README.md"
+license = { text = "Apache-2.0" }
+requires-python = ">=3.10"
+keywords = ["ai", "agents", "agentpave", "llm", "mcp", "langgraph", "runtime-agnostic"]
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Application Frameworks",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+
+[project.urls]
+Homepage = "https://github.com/<your-username>/agentpave"
+Specification = "https://github.com/<your-username>/agentpave/blob/main/docs/SPEC.md"
+"Bug Tracker" = "https://github.com/<your-username>/agentpave/issues"
