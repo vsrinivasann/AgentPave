@@ -117,9 +117,22 @@ AgentPave is extensible by design. Official extensions plug into defined extensi
 | Document | Description |
 |---|---|
 | [Baseline Structure](docs/BASELINE.md) | The complete, versioned AgentPave structure — the north star document |
-| AgentPave Spec v1.0 | *(coming soon)* Full specification for implementers |
-| AgentPave-LangGraph Guide | *(coming soon)* Building agents with the LangGraph implementation |
-| AgentPave-MAF Guide | *(coming soon)* Building agents with the MAF implementation |
+| [AgentPave Spec v1.1.2](docs/SPEC.md) | Master specification — 13 dimensions, 86 acceptance criteria, 32-error taxonomy |
+| [D1 — Identity](docs/spec/01-identity.md) | Agent identity, SPIFFE, AgentRegistry, Runtime Tokens |
+| [D2 — Lifecycle](docs/spec/02-lifecycle.md) | 6 lifecycle states, hooks, audit log |
+| [D3 — Communication](docs/spec/03-communication.md) | MCP, Integration Contracts, circuit breaker, A2A |
+| [D4 — Memory](docs/spec/04-memory.md) | Working, Episodic, Semantic, Procedural memory |
+| [D5 — Observability](docs/spec/05-observability.md) | OpenTelemetry, AgentResult schema, pluggable backends |
+| [D6 — Reliability](docs/spec/06-reliability.md) | Durable execution, checkpoints, deterministic routing, drift detection |
+| [D7 — Security](docs/spec/07-security.md) | Zero Trust, OPA/Cedar policy, OWASP Agentic Top 10 |
+| [D8 — Economics](docs/spec/08-economics.md) | Token budgets, model routing, semantic caching |
+| [D9 — Testability](docs/spec/09-testability.md) | Mock tools, evaluation framework, CI/CD gates |
+| [D10 — Developer Experience](docs/spec/10-developer-experience.md) | CLI, local runner, 5-minute hello world |
+| [D11 — Extensibility](docs/spec/11-extensibility.md) | 8 declared extension points, manifest schema |
+| [D12 — Governance](docs/spec/12-governance.md) | EU AI Act, SOC2, HIPAA, GDPR compliance adapters |
+| [D13 — Portability](docs/spec/13-portability.md) | Interoperability test suite, RuntimeAdapter interface |
+| AgentPave-LangGraph | *(coming soon)* Reference implementation — LangGraph runtime |
+| AgentPave-MAF | *(coming soon)* Reference implementation — Microsoft Agent Framework |
 
 ---
 
@@ -128,7 +141,10 @@ AgentPave is extensible by design. Official extensions plug into defined extensi
 | Item | Status |
 |---|---|
 | Baseline Structure | ✅ v1.0 — Baselined June 2026 |
-| AgentPave Spec | 🔄 In Progress |
+| AgentPave Spec | ✅ v1.1.2 — Published June 2026 |
+| MVP Dimensions (D1–D6) | ✅ Complete — 51 acceptance criteria |
+| Post-MVP Dimensions (D7–D13) | ✅ Complete — 35 acceptance criteria |
+| Error Taxonomy | ✅ Complete — 32 error types |
 | AgentPave-LangGraph | 📅 Planned |
 | AgentPave-MAF | 📅 Planned |
 
