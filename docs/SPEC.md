@@ -1,10 +1,11 @@
-# AgentPave Specification v1.1
+# AgentPave Specification v1.1.2
 
-**Status:** Draft — MVP Scope  
+**Status:** Published — All 13 Dimensions Complete  
 **Baselined from:** [AgentPave Baseline Structure v1.0](BASELINE.md)  
 **Spec Type:** Executable — suitable for human engineers and autonomous coding agents  
 **License:** Apache 2.0  
 **Stability:** See Section 6 for per-dimension stability levels  
+**Published:** June 2026  
 
 ---
 
@@ -960,8 +961,8 @@ See Section 8.3 in the previous version — extension schedule unchanged. Releas
 
 | Level | Description | Badge |
 |---|---|---|
-| **MVP Conformant** | All 15 spec invariants hold. All 6 MVP acceptance criteria pass. Dimensions 1–6 implemented. | `AgentPave MVP Conformant v1.1` |
-| **Full Conformant** | All 13 dimensions implemented. All invariants hold. All acceptance criteria pass. | `AgentPave Conformant v1.1` |
+| **MVP Conformant** | All 15 spec invariants hold. All 6 MVP acceptance criteria pass. Dimensions 1–6 implemented. | `AgentPave MVP Conformant v1.1.2` |
+| **Full Conformant** | All 13 dimensions implemented. All invariants hold. All acceptance criteria pass. | `AgentPave Conformant v1.1.2` |
 
 ### 12.2 Conformance Declaration File
 
@@ -1124,4 +1125,4 @@ Breaking changes to this spec:
 
 ---
 
-*AgentPave Specification v1.1 — Build agents, not plumbing.*
+*AgentPave Specification v1.1.2 — Build agents, not plumbing.*

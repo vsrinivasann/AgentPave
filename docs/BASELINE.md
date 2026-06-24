@@ -1,7 +1,7 @@
 # AgentPave — Baseline Structure v1.0
 
 **Baselined:** June 2026  
-**Status:** Approved for Spec Writing  
+**Status:** Baselined — Spec v1.1.2 Published (13 dimensions complete)  
 **Purpose:** Framework for creating agents, runtime-agnostic, developer-first  
 **Analogy:** SpringBoot for Agents — define once, run on LangGraph or MAF  
 
